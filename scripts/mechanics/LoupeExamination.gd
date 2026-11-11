@@ -8,12 +8,15 @@ extends Control
 #     names from the evidence registry. No clue data is written in this script.
 #   - Clicking a clue circle (zoomed in far enough) calls GameState.collect_evidence().
 #     That makes GameState emit its evidence_added signal, and this scene listens
-#     to that signal to show the feedback (gold ring, banner, print message).
+#     to that signal to show the feedback (gold ring, message box, print message).
 #
 # Input only changes the TARGET zoom and position. _process() then glides the
 # photo toward those targets a little every frame.
 
 signal all_clues_found
+
+const DialogueBoxScene: PackedScene = preload("res://scenes/ui/dialogue/dialogue_box.tscn")
+const DialogueBoxScript := preload("res://scripts/ui/DialogueBox.gd")
 
 @export_file("*.json") var puzzle_path: String = "res://data/puzzles/ch01_loupe.json"
 @export_file("*.json") var evidence_registry_path: String = "res://data/evidence/evidence_registry.json"
@@ -35,7 +38,7 @@ const CLICK_TRAVEL_LIMIT: float = 8.0
 const CLICK_FORGIVENESS_PX: float = 14.0
 const PULSE_SECONDS: float = 0.9
 const PULSE_GROWTH_PX: float = 90.0
-const BANNER_HOLD_SECONDS: float = 3.0
+const MESSAGE_HOLD_SECONDS: float = 3.0
 const FOUND_COLOR: Color = Color(1.0, 0.82, 0.25)
 const DEBUG_COLOR: Color = Color(1.0, 0.3, 0.3, 0.55)
 
@@ -68,8 +71,7 @@ var targets: Array[ClueTarget] = []
 var pulses: Dictionary = {}
 
 var overlay: Control
-var banner: Label
-var banner_tween: Tween
+var dialogue: DialogueBoxScript
 
 
 func _ready() -> void:
@@ -94,7 +96,7 @@ func _ready() -> void:
 		return
 
 	_enable_smooth_minifying()
-	_build_overlay_and_banner()
+	_build_overlay_and_dialogue()
 	resized.connect(_fit_photo)
 	_fit_photo()
 	_spawn_hotspots()
@@ -245,8 +247,9 @@ func _enable_smooth_minifying() -> void:
 	photo.texture = ImageTexture.create_from_image(image)
 
 
-# The overlay draws the rings on top of the photo. The banner shows the clue text.
-func _build_overlay_and_banner() -> void:
+# The overlay draws the rings on top of the photo. The dialogue box (added last, so it
+# sits on top) shows the clue text along the bottom of the screen.
+func _build_overlay_and_dialogue() -> void:
 	overlay = Control.new()
 	overlay.name = "ClueOverlay"
 	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -254,21 +257,9 @@ func _build_overlay_and_banner() -> void:
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.draw.connect(_draw_overlay)
 
-	banner = Label.new()
-	banner.name = "ClueBanner"
-	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	banner.add_theme_font_size_override("font_size", 30)
-	banner.add_theme_color_override("font_color", Color(1.0, 0.95, 0.8))
-	banner.add_theme_color_override("font_outline_color", Color.BLACK)
-	banner.add_theme_constant_override("outline_size", 10)
-	banner.modulate.a = 0.0
-	add_child(banner)
-	banner.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	banner.offset_left = 160.0
-	banner.offset_right = -160.0
-	banner.offset_top = 40.0
+	dialogue = DialogueBoxScene.instantiate()
+	dialogue.name = "DialogueBox"
+	add_child(dialogue)
 
 
 # ------------------------------------------------------------------ the photo
@@ -331,7 +322,7 @@ func _try_click(screen_position: Vector2) -> void:
 		if photo_point.distance_to(target.center_px) > reach:
 			continue
 		if shown_zoom + 0.05 < target.min_zoom:
-			_show_banner("There is something here, but it is too small to make out.\nZoom in closer.")
+			_show_message("", "There is something here, but it is too small to make out. Zoom in closer.")
 			return
 		GameState.collect_evidence(target.evidence_id)
 		return
@@ -347,16 +338,13 @@ func _on_evidence_added(evidence_id: String) -> void:
 	var clue_name: String = str(info.get("name", evidence_id))
 	print("CLUE FOUND: %s (%s)" % [clue_name, evidence_id])
 
-	var text: String = "Clue found: %s" % clue_name
 	var description: String = str(info.get("description", ""))
-	if description != "":
-		text += "\n" + description
-
 	var everything_found: bool = _all_found()
-	if everything_found:
-		text += "\nAll clues in this photo found!"
 
-	_show_banner(text)
+	var messages: Array = [{ "name": "Clue found: %s" % clue_name, "text": description }]
+	if everything_found:
+		messages.append({ "name": "Photo complete", "text": "You found every clue in this photo." })
+	dialogue.play_lines(messages, false, MESSAGE_HOLD_SECONDS + 1.0)
 	_play_found_effect(evidence_id)
 
 	if everything_found:
@@ -383,14 +371,8 @@ func _all_found() -> bool:
 
 # ------------------------------------------------------------------- feedback
 
-func _show_banner(text: String) -> void:
-	if banner_tween != null:
-		banner_tween.kill()
-	banner.text = text
-	banner.modulate.a = 1.0
-	banner_tween = create_tween()
-	banner_tween.tween_interval(BANNER_HOLD_SECONDS)
-	banner_tween.tween_property(banner, "modulate:a", 0.0, 0.6)
+func _show_message(title: String, body: String) -> void:
+	dialogue.show_notice(title, body, MESSAGE_HOLD_SECONDS)
 
 
 # A gold ring grows out from the clue and fades. After it, a thin gold outline stays.

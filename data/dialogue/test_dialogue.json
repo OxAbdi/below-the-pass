@@ -1,0 +1,13 @@
+{
+  "_notes": [
+    "dialogue_id: must match the file name (without .json).",
+    "lines: played in order. Each line needs 'speaker' (a key from data/characters/portraits.json) and 'text'.",
+    "A line may also set 'name' to override the name shown above the text."
+  ],
+  "dialogue_id": "test_dialogue",
+  "lines": [
+    { "speaker": "james", "text": "The print looks perfect. That is exactly what bothers me." },
+    { "speaker": "priya", "text": "Perfect is what the town paid for, Mr. Flint. Nobody here wants it to look any other way." },
+    { "speaker": "james", "text": "Then let's find out what they did not pay for." }
+  ]
+}
