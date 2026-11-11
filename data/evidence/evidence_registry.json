@@ -1,0 +1,25 @@
+{
+  "evidence": {
+    "ch01_shadow_directions": {
+      "name": "Two shadow directions",
+      "description": "Shadows in the anniversary print fall in two different directions, so two light sources were used.",
+      "proves": "staging",
+      "proof_tier": 1,
+      "chapter": 1
+    },
+    "ch01_snowbank_depth": {
+      "name": "Snowbank depth mismatch",
+      "description": "The snowbank in the photo does not match the drift recorded that night, so the location was built.",
+      "proves": "staging",
+      "proof_tier": 1,
+      "chapter": 1
+    },
+    "ch01_logo_patch": {
+      "name": "Knitwear logo in cloned patch",
+      "description": "A knitwear brand logo founded in 1998 sits inside a cloned patch, so the print was retouched recently.",
+      "proves": "retouching",
+      "proof_tier": 3,
+      "chapter": 1
+    }
+  }
+}

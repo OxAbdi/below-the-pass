@@ -1,0 +1,37 @@
+{
+  "_notes": [
+    "photo: the picture to examine.",
+    "zoom.min and zoom.max: 1.0 means the whole photo fits the screen. 6.0 is six times closer.",
+    "zoom.wheel_factor: how much one scroll step zooms (1.15 = 15 percent).",
+    "targets[].center: [x, y] position on the photo, from 0.0 (left or top) to 1.0 (right or bottom).",
+    "targets[].radius: size of the clickable circle, as a fraction of the photo WIDTH.",
+    "targets[].min_zoom: how far the player must zoom in before the clue can be found."
+  ],
+  "puzzle_id": "ch01_loupe",
+  "photo": "res://assets/art/photos/test_photo.jpg.jpg",
+  "zoom": {
+    "min": 1.0,
+    "max": 6.0,
+    "wheel_factor": 1.15
+  },
+  "targets": [
+    {
+      "evidence_id": "ch01_shadow_directions",
+      "center": [0.753, 0.626],
+      "radius": 0.03,
+      "min_zoom": 2.5
+    },
+    {
+      "evidence_id": "ch01_snowbank_depth",
+      "center": [0.177, 0.238],
+      "radius": 0.05,
+      "min_zoom": 2.0
+    },
+    {
+      "evidence_id": "ch01_logo_patch",
+      "center": [0.466, 0.589],
+      "radius": 0.02,
+      "min_zoom": 4.0
+    }
+  ]
+}

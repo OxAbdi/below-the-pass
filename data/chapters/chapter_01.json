@@ -1,0 +1,7 @@
+{
+  "chapter": 1,
+  "title": "Developed in Silence",
+  "beats": [
+    { "id": "ch01_b1", "location": "james_room", "puzzle": "ch01_loupe" }
+  ]
+}
