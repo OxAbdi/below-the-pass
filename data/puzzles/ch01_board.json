@@ -1,0 +1,61 @@
+{
+  "_notes": [
+    "Grey-box test board for Milestone 3. The final Chapter 1 board is set later.",
+    "cards: evidence ids (from data/evidence/evidence_registry.json). A card only shows if the player holds that evidence. Order sets the default grid position, so do not reorder after release.",
+    "reaction_name: name shown above the text-only reaction lines.",
+    "links[].pair: two evidence ids, in any order. deduction is the short tag on the locked string, line is what is said when it locks.",
+    "wrong_reactions[].pair: a wrong pair that gets its own line. Any other wrong pair uses fallback_reactions in turn.",
+    "already_linked_line: said when the player tries a pair that is already locked."
+  ],
+  "board_id": "ch01_board",
+  "title": "CASE BOARD - Chapter 1",
+  "reaction_name": "James Flint",
+  "cards": [
+    "ch01_shadow_directions",
+    "ch01_snowbank_depth",
+    "ch01_logo_patch",
+    "ch01_anniversary_leaflet"
+  ],
+  "links": [
+    {
+      "link_id": "ch01_link_staged",
+      "pair": [
+        "ch01_shadow_directions",
+        "ch01_snowbank_depth"
+      ],
+      "deduction": "The scene was built",
+      "line": "Two light sources, and a snowbank nobody recorded that night. Someone built this scene."
+    },
+    {
+      "link_id": "ch01_link_retouched",
+      "pair": [
+        "ch01_logo_patch",
+        "ch01_anniversary_leaflet"
+      ],
+      "deduction": "Retouched after 2016",
+      "line": "The 2016 leaflet prints the same frame, and there's no logo in it. Someone went back into this photo after that."
+    }
+  ],
+  "wrong_reactions": [
+    {
+      "pair": [
+        "ch01_shadow_directions",
+        "ch01_logo_patch"
+      ],
+      "line": "Both say fake. They don't say the same fake. One is 1996, the other is much newer."
+    },
+    {
+      "pair": [
+        "ch01_snowbank_depth",
+        "ch01_anniversary_leaflet"
+      ],
+      "line": "The leaflet just reprints the photo. It can't tell me how deep the snow was."
+    }
+  ],
+  "fallback_reactions": [
+    "No. Those two don't talk to each other.",
+    "I'm forcing it. Look again.",
+    "Close, but that isn't the thread."
+  ],
+  "already_linked_line": "We've already got that."
+}

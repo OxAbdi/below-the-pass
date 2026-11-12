@@ -8,6 +8,7 @@ signal evidence_added(evidence_id: String)
 signal trust_changed(character: String, new_value: int)
 signal proof_tier_unlocked(tier: int)
 signal choice_made(choice_id: String, value: Variant)
+signal link_made(link_id: String)
 signal state_reset
 
 const TRUST_MIN: int = 0
@@ -39,6 +40,12 @@ var puzzles_solved: Dictionary = {}
 
 # Story choices, e.g. "ch02_negatives" -> "priya". Added as the story needs them.
 var choices: Dictionary = {}
+
+# Case Board. link_id -> true. IDs match the "links" in /data/puzzles/*_board.json.
+var board_links: Dictionary = {}
+
+# Case Board card positions. evidence_id -> [x, y] (an array, so it saves to JSON cleanly).
+var board_layout: Dictionary = {}
 
 
 func collect_evidence(evidence_id: String) -> void:
@@ -103,6 +110,28 @@ func get_choice(choice_id: String, default_value: Variant = null) -> Variant:
 	return choices.get(choice_id, default_value)
 
 
+func add_link(link_id: String) -> void:
+	if board_links.has(link_id):
+		return
+	board_links[link_id] = true
+	link_made.emit(link_id)
+
+
+func has_link(link_id: String) -> bool:
+	return board_links.get(link_id, false)
+
+
+func set_card_position(evidence_id: String, pos: Vector2) -> void:
+	board_layout[evidence_id] = [pos.x, pos.y]
+
+
+func get_card_position(evidence_id: String, fallback: Vector2) -> Vector2:
+	var stored: Variant = board_layout.get(evidence_id)
+	if stored is Array and stored.size() == 2:
+		return Vector2(float(stored[0]), float(stored[1]))
+	return fallback
+
+
 func reset() -> void:
 	current_chapter = 1
 	current_scene_id = ""
@@ -113,6 +142,8 @@ func reset() -> void:
 	evidence_collected.clear()
 	puzzles_solved.clear()
 	choices.clear()
+	board_links.clear()
+	board_layout.clear()
 	state_reset.emit()
 
 
@@ -129,6 +160,8 @@ func get_save_data() -> Dictionary:
 		"evidence_collected": evidence_collected.duplicate(),
 		"puzzles_solved": puzzles_solved.duplicate(),
 		"choices": choices.duplicate(),
+		"board_links": board_links.duplicate(),
+		"board_layout": board_layout.duplicate(true),
 	}
 
 
@@ -151,3 +184,5 @@ func load_save_data(data: Dictionary) -> void:
 	evidence_collected = data.get("evidence_collected", {}).duplicate()
 	puzzles_solved = data.get("puzzles_solved", {}).duplicate()
 	choices = data.get("choices", {}).duplicate()
+	board_links = data.get("board_links", {}).duplicate()
+	board_layout = data.get("board_layout", {}).duplicate(true)

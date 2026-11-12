@@ -1,0 +1,161 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/mechanics/CaseBoard.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogue/dialogue_box.tscn" id="2_box"]
+[ext_resource type="FontFile" path="res://assets/fonts/KleeOne-Regular.ttf" id="3_body"]
+[ext_resource type="FontFile" path="res://assets/fonts/KleeOne-SemiBold.ttf" id="4_name"]
+
+[sub_resource type="StyleBoxFlat" id="Style_detail"]
+bg_color = Color(0.09, 0.07, 0.19, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.68, 0.3, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.85, 0.68, 0.3, 0.35)
+shadow_size = 22
+
+[node name="CaseBoard" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Wall" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Surface" type="Control" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 130.0
+offset_right = 1100.0
+offset_bottom = 790.0
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 22.0
+offset_right = 1100.0
+offset_bottom = 78.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 0.83, 0.42, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.55)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("4_name")
+theme_override_font_sizes/font_size = 40
+text = "CASE BOARD"
+
+[node name="Controls" type="Label" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 86.0
+offset_right = 1860.0
+offset_bottom = 120.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.78, 0.74, 0.92, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 20
+text = "Drag a card to move it  |  drag from its pin onto another card to link  |  click a linked card to read it  |  Keys: arrows, Enter link, Q read, Esc back"
+
+[node name="Strings" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Cards" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Tags" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="EmptyLabel" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 60.0
+offset_top = 420.0
+offset_right = 1100.0
+offset_bottom = 500.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.85, 0.8, 0.95, 1)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 28
+text = "Nothing on the board yet. Find clues and they will appear here."
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Hint" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1160.0
+offset_top = 130.0
+offset_right = 1860.0
+offset_bottom = 230.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.72, 0.68, 0.88, 0.85)
+theme_override_fonts/font = ExtResource("3_body")
+theme_override_font_sizes/font_size = 22
+text = "Click a card that has a string on it to read the deduction here."
+autowrap_mode = 3
+
+[node name="DetailPanel" type="Panel" parent="."]
+layout_mode = 0
+offset_left = 1160.0
+offset_top = 130.0
+offset_right = 1860.0
+offset_bottom = 790.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_detail")
+
+[node name="Text" type="RichTextLabel" parent="DetailPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 24.0
+offset_right = -28.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_colors/default_color = Color(0.93, 0.9, 0.96, 1)
+theme_override_fonts/normal_font = ExtResource("3_body")
+theme_override_fonts/bold_font = ExtResource("4_name")
+theme_override_font_sizes/normal_font_size = 24
+theme_override_font_sizes/bold_font_size = 26
+bbcode_enabled = true
+scroll_active = false
+
+[node name="DialogueBox" parent="." instance=ExtResource("2_box")]
+layout_mode = 1

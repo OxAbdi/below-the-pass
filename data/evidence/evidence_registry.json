@@ -5,21 +5,36 @@
       "description": "Shadows in the anniversary print fall in two different directions, so two light sources were used.",
       "proves": "staging",
       "proof_tier": 1,
-      "chapter": 1
+      "chapter": 1,
+      "card_style": "photo",
+      "accent": "#ffb347"
     },
     "ch01_snowbank_depth": {
       "name": "Snowbank depth mismatch",
       "description": "The snowbank in the photo does not match the drift recorded that night, so the location was built.",
       "proves": "staging",
       "proof_tier": 1,
-      "chapter": 1
+      "chapter": 1,
+      "card_style": "photo",
+      "accent": "#5ec8ff"
     },
     "ch01_logo_patch": {
       "name": "Knitwear logo in cloned patch",
       "description": "A knitwear brand logo founded in 1998 sits inside a cloned patch, so the print was retouched recently.",
       "proves": "retouching",
       "proof_tier": 3,
-      "chapter": 1
+      "chapter": 1,
+      "card_style": "photo",
+      "accent": "#d92f3a"
+    },
+    "ch01_anniversary_leaflet": {
+      "name": "2016 anniversary leaflet",
+      "description": "A leaflet for the 20th anniversary, found in Katherine's flat. It reprints the rescue photo, and the frame has no knitwear logo.",
+      "proves": "retouching",
+      "proof_tier": 3,
+      "chapter": 1,
+      "card_style": "note",
+      "accent": "#a78bfa"
     }
   }
 }
