@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/DialogueBox.gd" id="1_script"]
-[ext_resource type="FontFile" path="res://assets/fonts/JosefinSans-Variable.ttf" id="2_font"]
+[ext_resource type="FontFile" path="res://assets/fonts/KleeOne-Regular.ttf" id="2_body"]
+[ext_resource type="FontFile" path="res://assets/fonts/KleeOne-SemiBold.ttf" id="3_name"]
 
 [sub_resource type="Gradient" id="Gradient_shade"]
 offsets = PackedFloat32Array(0, 0.6, 1)
@@ -13,18 +14,6 @@ width = 8
 height = 256
 fill_from = Vector2(0, 0)
 fill_to = Vector2(0, 1)
-
-[sub_resource type="FontVariation" id="FontVariation_body"]
-base_font = ExtResource("2_font")
-variation_opentype = {
-2003265652: 300.0
-}
-
-[sub_resource type="FontVariation" id="FontVariation_name"]
-base_font = ExtResource("2_font")
-variation_opentype = {
-2003265652: 500.0
-}
 
 [node name="DialogueBox" type="Control"]
 layout_mode = 3
@@ -58,35 +47,33 @@ stretch_mode = 5
 [node name="TextBlock" type="VBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 200.0
-offset_top = 770.0
+offset_top = 800.0
 offset_right = 1120.0
 offset_bottom = 1040.0
 mouse_filter = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 4
 
 [node name="NameLabel" type="Label" parent="TextBlock"]
 layout_mode = 2
 mouse_filter = 2
 theme_override_colors/font_color = Color(1, 0.31, 0.69, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
-theme_override_constants/shadow_offset_x = 3
-theme_override_constants/shadow_offset_y = 3
-theme_override_constants/shadow_outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_name")
-theme_override_font_sizes/font_size = 48
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("3_name")
+theme_override_font_sizes/font_size = 32
 
 [node name="TextLabel" type="RichTextLabel" parent="TextBlock"]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/default_color = Color(1, 1, 1, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
-theme_override_constants/line_separation = 14
-theme_override_constants/shadow_offset_x = 3
-theme_override_constants/shadow_offset_y = 3
-theme_override_constants/shadow_outline_size = 4
-theme_override_fonts/normal_font = SubResource("FontVariation_body")
-theme_override_font_sizes/normal_font_size = 44
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/line_separation = 10
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/normal_font = ExtResource("2_body")
+theme_override_font_sizes/normal_font_size = 28
 scroll_active = false
 autowrap_mode = 3
 

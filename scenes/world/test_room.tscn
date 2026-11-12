@@ -1,0 +1,186 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/TestRoom.gd" id="1_room"]
+[ext_resource type="PackedScene" path="res://scenes/world/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/world/prop.tscn" id="3_prop"]
+[ext_resource type="PackedScene" path="res://scenes/world/interactable.tscn" id="4_inter"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogue/dialogue_box.tscn" id="5_box"]
+
+[sub_resource type="RectangleShape2D" id="Rect_Top"]
+size = Vector2(2560, 260)
+
+[sub_resource type="RectangleShape2D" id="Rect_Bottom"]
+size = Vector2(2560, 80)
+
+[sub_resource type="RectangleShape2D" id="Rect_Left"]
+size = Vector2(80, 1440)
+
+[sub_resource type="RectangleShape2D" id="Rect_Right"]
+size = Vector2(80, 1440)
+
+[sub_resource type="RectangleShape2D" id="Rect_Partition"]
+size = Vector2(40, 520)
+
+[sub_resource type="Gradient" id="Gradient_lamp"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lamp"]
+gradient = SubResource("Gradient_lamp")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="TestRoom" type="Node2D"]
+script = ExtResource("1_room")
+
+[node name="Tint" type="CanvasModulate" parent="."]
+color = Color(0.3, 0.36, 0.56, 1)
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_right = 2560.0
+offset_bottom = 1440.0
+mouse_filter = 2
+color = Color(0.55, 0.45, 0.36, 1)
+
+[node name="BackWall" type="ColorRect" parent="."]
+offset_right = 2560.0
+offset_bottom = 260.0
+mouse_filter = 2
+color = Color(0.35, 0.27, 0.25, 1)
+
+[node name="WallBottom" type="ColorRect" parent="."]
+offset_top = 1360.0
+offset_right = 2560.0
+offset_bottom = 1440.0
+mouse_filter = 2
+color = Color(0.35, 0.27, 0.25, 1)
+
+[node name="WallLeft" type="ColorRect" parent="."]
+offset_right = 80.0
+offset_bottom = 1440.0
+mouse_filter = 2
+color = Color(0.35, 0.27, 0.25, 1)
+
+[node name="WallRight" type="ColorRect" parent="."]
+offset_left = 2480.0
+offset_right = 2560.0
+offset_bottom = 1440.0
+mouse_filter = 2
+color = Color(0.35, 0.27, 0.25, 1)
+
+[node name="World" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Walls" type="StaticBody2D" parent="World"]
+collision_layer = 1
+collision_mask = 0
+
+[node name="Top" type="CollisionShape2D" parent="World/Walls"]
+position = Vector2(1280.0, 130)
+shape = SubResource("Rect_Top")
+
+[node name="Bottom" type="CollisionShape2D" parent="World/Walls"]
+position = Vector2(1280.0, 1400)
+shape = SubResource("Rect_Bottom")
+
+[node name="Left" type="CollisionShape2D" parent="World/Walls"]
+position = Vector2(40, 720.0)
+shape = SubResource("Rect_Left")
+
+[node name="Right" type="CollisionShape2D" parent="World/Walls"]
+position = Vector2(2520, 720.0)
+shape = SubResource("Rect_Right")
+
+[node name="Partition" type="CollisionShape2D" parent="World/Walls"]
+position = Vector2(1500, 560)
+shape = SubResource("Rect_Partition")
+
+[node name="PartitionVisual" type="ColorRect" parent="World/Walls"]
+offset_left = 1480.0
+offset_top = 300.0
+offset_right = 1520.0
+offset_bottom = 820.0
+mouse_filter = 2
+color = Color(0.3, 0.22, 0.2, 1)
+
+[node name="Desk" parent="World" instance=ExtResource("3_prop")]
+position = Vector2(700, 520)
+size = Vector2(260, 110)
+footprint_depth = 50.0
+color = Color(0.5, 0.33, 0.24, 1)
+label = "DESK"
+
+[node name="Bookshelf" parent="World" instance=ExtResource("3_prop")]
+position = Vector2(1100, 480)
+size = Vector2(200, 300)
+footprint_depth = 50.0
+color = Color(0.4, 0.28, 0.22, 1)
+label = "SHELF (tall)"
+
+[node name="Crate" parent="World" instance=ExtResource("3_prop")]
+position = Vector2(1000, 900)
+size = Vector2(120, 120)
+footprint_depth = 80.0
+color = Color(0.42, 0.4, 0.3, 1)
+label = "CRATE"
+
+[node name="Table" parent="World" instance=ExtResource("3_prop")]
+position = Vector2(1900, 1000)
+size = Vector2(300, 140)
+footprint_depth = 70.0
+color = Color(0.45, 0.36, 0.3, 1)
+label = "TABLE"
+
+[node name="DeskInteract" parent="World" instance=ExtResource("4_inter") groups=["interactables"]]
+position = Vector2(700, 580)
+dialogue_id = "desk_note"
+prompt_text = "Examine desk"
+
+[node name="Lamp" type="Node2D" parent="World"]
+position = Vector2(560, 470)
+
+[node name="Bulb" type="ColorRect" parent="World/Lamp"]
+offset_left = -10.0
+offset_top = -150.0
+offset_right = 10.0
+offset_bottom = 0.0
+mouse_filter = 2
+color = Color(0.25, 0.2, 0.15, 1)
+
+[node name="PointLight2D" type="PointLight2D" parent="World/Lamp"]
+position = Vector2(0, -150)
+color = Color(1, 0.69, 0.35, 1)
+energy = 1.6
+texture = SubResource("GradientTexture2D_lamp")
+texture_scale = 2.2
+
+[node name="Player" parent="World" instance=ExtResource("2_player")]
+position = Vector2(400, 900)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="Info" type="Label" parent="UI"]
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 1500.0
+offset_bottom = 56.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+
+[node name="Fps" type="Label" parent="UI"]
+offset_left = 24.0
+offset_top = 56.0
+offset_right = 300.0
+offset_bottom = 96.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 24
+
+[node name="DialogueBox" parent="UI" instance=ExtResource("5_box")]

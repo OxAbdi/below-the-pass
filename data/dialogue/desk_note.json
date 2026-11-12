@@ -1,0 +1,11 @@
+{
+  "_notes": [
+    "Grey-box test dialogue for Milestone 2 (the desk in test_room).",
+    "speaker must be a key from data/characters/portraits.json."
+  ],
+  "dialogue_id": "desk_note",
+  "lines": [
+    { "speaker": "james", "text": "A desk with nothing on it. Nobody works this tidy unless they are hiding something." },
+    { "speaker": "james", "text": "Movement is frozen while I talk. Press the dialogue through and I can walk again." }
+  ]
+}
