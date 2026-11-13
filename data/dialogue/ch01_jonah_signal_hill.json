@@ -1,0 +1,219 @@
+{
+  "_notes": [
+    "Chapter 1, beat 5: Jonah on Signal Hill. He lies about when he last saw Katherine; the café CCTV still catches him.",
+    "Format (full description in docs/milestone-5.md):",
+    "entries: checked top to bottom, the first whose 'if' passes picks the start node.",
+    "nodes: each has 'lines', then either 'choices' (topics) or 'next' (a node id, or 'end').",
+    "A line with 'statement' goes on record. 'contradictions' says which evidence catches which statement.",
+    "effects happen the first time a node plays. 'no_present' switches the Present button off for that node.",
+    "partner: who James is talking to (a key from portraits.json). Used for the folder heading 'Present to ...' and to face that person when evidence is shown."
+  ],
+  "conversation_id": "ch01_jonah_signal_hill",
+  "partner": "jonah",
+  "entries": [
+    {
+      "if": {
+        "flag": "talked:ch01_jonah_signal_hill"
+      },
+      "node": "hub"
+    },
+    {
+      "node": "intro"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "jonah",
+          "expression": "neutral",
+          "text": "You're the photo man. From the insurance archive."
+        },
+        {
+          "speaker": "james",
+          "text": "James Flint. I'm looking for Katherine Marr."
+        },
+        {
+          "speaker": "jonah",
+          "expression": "worried",
+          "text": "Half the hill's looking for her. Doesn't mean she wants finding."
+        }
+      ],
+      "effects": [
+        {
+          "set_flag": "talked:ch01_jonah_signal_hill"
+        }
+      ],
+      "next": "hub"
+    },
+    "hub": {
+      "lines": [],
+      "choices": [
+        {
+          "text": "When did you last see Katherine?",
+          "goto": "last_seen",
+          "once": true
+        },
+        {
+          "text": "What do you do up here?",
+          "goto": "work",
+          "once": true
+        },
+        {
+          "text": "What did she say about the photograph?",
+          "goto": "about_photo",
+          "once": true,
+          "if": {
+            "flag": "ch01_jonah_caught"
+          }
+        },
+        {
+          "text": "That's all for now.",
+          "goto": "leave"
+        }
+      ]
+    },
+    "last_seen": {
+      "lines": [
+        {
+          "speaker": "jonah",
+          "expression": "neutral",
+          "text": "Tuesday. She came by the darkroom for some old contact sheets."
+        },
+        {
+          "speaker": "jonah",
+          "expression": "neutral",
+          "text": "I haven't seen her since Tuesday.",
+          "statement": "jonah_since_tuesday"
+        }
+      ],
+      "next": "hub"
+    },
+    "work": {
+      "lines": [
+        {
+          "speaker": "jonah",
+          "expression": "neutral",
+          "text": "I keep the darkroom going. It was my great-aunt's."
+        },
+        {
+          "speaker": "jonah",
+          "expression": "worried",
+          "text": "Ines. She died last month. Fell in the signal tower. You'll have heard."
+        },
+        {
+          "speaker": "james",
+          "text": "I'm sorry."
+        }
+      ],
+      "next": "hub"
+    },
+    "caught_thursday": {
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "The café camera. Thursday, 21:32. That's you at her table."
+        },
+        {
+          "speaker": "jonah",
+          "expression": "worried",
+          "text": "That camera's been broken for a year."
+        },
+        {
+          "speaker": "james",
+          "text": "Not on Thursday."
+        },
+        {
+          "speaker": "jonah",
+          "expression": "worried",
+          "text": "...Fine. Thursday. She was shaking. She asked me to bring her something to eat and not to tell anyone I'd seen her."
+        },
+        {
+          "speaker": "jonah",
+          "expression": "angry",
+          "text": "I don't know where she's sleeping. And I'm not lying about that."
+        }
+      ],
+      "effects": [
+        {
+          "set_flag": "ch01_jonah_caught"
+        },
+        {
+          "collect_evidence": "ch01_jonah_admission"
+        },
+        {
+          "add_trust": {
+            "character": "jonah",
+            "amount": -1
+          }
+        }
+      ],
+      "next": "hub"
+    },
+    "about_photo": {
+      "lines": [
+        {
+          "speaker": "jonah",
+          "expression": "worried",
+          "text": "That it wasn't her. She's been saying it for years. Nobody listens to the girl from the photograph."
+        },
+        {
+          "speaker": "jonah",
+          "expression": "neutral",
+          "text": "And that the new print was wrong. Wrong like someone did it on purpose."
+        },
+        {
+          "speaker": "james",
+          "text": "She's right about that."
+        }
+      ],
+      "effects": [
+        {
+          "set_flag": "ch01_jonah_photo_talk"
+        }
+      ],
+      "next": "hub"
+    },
+    "leave": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "jonah",
+          "expression": "neutral",
+          "text": "Mind the ice on the way down."
+        }
+      ],
+      "next": "end"
+    }
+  },
+  "contradictions": [
+    {
+      "statement": "jonah_since_tuesday",
+      "evidence": "ch01_cctv_thursday",
+      "goto": "caught_thursday"
+    }
+  ],
+  "wrong_present": [
+    [
+      {
+        "speaker": "jonah",
+        "expression": "neutral",
+        "text": "I don't know what you want me to say about that."
+      }
+    ],
+    [
+      {
+        "speaker": "jonah",
+        "expression": "worried",
+        "text": "That's got nothing to do with me."
+      }
+    ],
+    [
+      {
+        "speaker": "james",
+        "text": "No. That isn't what he's hiding."
+      }
+    ]
+  ]
+}

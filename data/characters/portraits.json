@@ -5,32 +5,86 @@
     "name_color: colour of that name (any hex colour).",
     "placeholder_color: colour of the grey-box rectangle used while there is no real art.",
     "texture: path to the real portrait image. Leave it empty until the art exists, then fill it in. No code changes needed.",
-    "Portraits always sit on the right side of the screen. The text sits on the left."
+    "Portraits always sit on the right side of the screen. The text sits on the left.",
+    "expressions: one image path per expression (neutral, worried, angry). A path here is used instead of 'texture' for that expression. Leave them empty until the art exists: the grey-box portrait then draws simple eyebrows so a change of expression can still be seen."
   ],
   "portraits": {
     "james": {
       "display_name": "James Flint",
       "name_color": "#e0b84d",
       "placeholder_color": "#5b7fa6",
-      "texture": ""
+      "texture": "",
+      "expressions": {
+        "neutral": "",
+        "worried": "",
+        "angry": ""
+      }
     },
     "priya": {
       "display_name": "Priya",
       "name_color": "#ff4fb0",
       "placeholder_color": "#a65b6b",
-      "texture": ""
+      "texture": "",
+      "expressions": {
+        "neutral": "",
+        "worried": "",
+        "angry": ""
+      }
     },
     "brandt": {
       "display_name": "Brandt",
       "name_color": "#7fd18b",
       "placeholder_color": "#6b8f5b",
-      "texture": ""
+      "texture": "",
+      "expressions": {
+        "neutral": "",
+        "worried": "",
+        "angry": ""
+      }
     },
     "silas": {
       "display_name": "Silas",
       "name_color": "#9ecbff",
       "placeholder_color": "#8f7a5b",
-      "texture": ""
+      "texture": "",
+      "expressions": {
+        "neutral": "",
+        "worried": "",
+        "angry": ""
+      }
+    },
+    "jonah": {
+      "display_name": "Jonah",
+      "name_color": "#ffb47a",
+      "placeholder_color": "#6b5b8f",
+      "texture": "",
+      "expressions": {
+        "neutral": "",
+        "worried": "",
+        "angry": ""
+      }
+    },
+    "nan": {
+      "display_name": "Nan",
+      "name_color": "#f2c14e",
+      "placeholder_color": "#a6795b",
+      "texture": "",
+      "expressions": {
+        "neutral": "",
+        "worried": "",
+        "angry": ""
+      }
+    },
+    "katherine": {
+      "display_name": "Katherine",
+      "name_color": "#ff8f8f",
+      "placeholder_color": "#8f5b6b",
+      "texture": "",
+      "expressions": {
+        "neutral": "",
+        "worried": "",
+        "angry": ""
+      }
     }
   }
 }

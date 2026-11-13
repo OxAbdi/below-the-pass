@@ -4,11 +4,11 @@
 [ext_resource type="FontFile" path="res://assets/fonts/KleeOne-SemiBold.ttf" id="2_font"]
 
 [node name="EvidenceCard" type="Control"]
-custom_minimum_size = Vector2(260, 190)
+custom_minimum_size = Vector2(208, 152)
 layout_mode = 3
 anchors_preset = 0
-offset_right = 260.0
-offset_bottom = 190.0
+offset_right = 208.0
+offset_bottom = 152.0
 script = ExtResource("1_script")
 
 [node name="Margin" type="MarginContainer" parent="."]

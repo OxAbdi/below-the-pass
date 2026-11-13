@@ -1,0 +1,69 @@
+{
+  "_notes": [
+    "Prompt keys shown under the text during a conversation. Same format as board_prompts.json.",
+    "empty_picker_text is shown in the evidence folder when James has nothing to present yet.",
+    "picker_heading: %s is replaced by the name of the person James is talking to."
+  ],
+  "empty_picker_text": "Nothing to show yet.",
+  "picker_heading": "Present to %s",
+  "contexts": {
+    "reading": [
+      {
+        "key": "Space",
+        "pad": "a",
+        "mouse": "left",
+        "label": "Continue"
+      }
+    ],
+    "reading_present": [
+      {
+        "key": "Space",
+        "pad": "a",
+        "mouse": "left",
+        "label": "Continue"
+      },
+      {
+        "key": "Q",
+        "pad": "y",
+        "mouse": "",
+        "label": "Present"
+      }
+    ],
+    "choosing": [
+      {
+        "key": "1-6",
+        "pad": "a",
+        "mouse": "left",
+        "label": "Choose"
+      },
+      {
+        "key": "Q",
+        "pad": "y",
+        "mouse": "",
+        "label": "Present"
+      }
+    ],
+    "choosing_only": [
+      {
+        "key": "1-6",
+        "pad": "a",
+        "mouse": "left",
+        "label": "Choose"
+      }
+    ],
+    "picking": [
+      {
+        "key": "Enter",
+        "pad": "a",
+        "mouse": "left",
+        "label": "Present"
+      },
+      {
+        "key": "Esc",
+        "pad": "b",
+        "mouse": "",
+        "label": "Back"
+      }
+    ]
+  }
+}

@@ -2,8 +2,11 @@ extends Control
 
 # One evidence card on the case board, drawn in code in a clean anime / webtoon style:
 # rounded corners, dark ink outline, flat colour with soft gradients and soft shadows.
-# It is either a photo print or a paper note (the registry's "card_style"), and every clue
-# has its own accent colour (the registry's "accent").
+# It is a photo print, a paper note (the registry's "card_style"), a LEAD or a CONCLUSION.
+#   Lead        a page torn from James's notebook. It still has to be combined with something, so it has
+#               a normal pin and a loose end of string that sways.
+#   Conclusion  a finished cream index card with a gold corner and a flat brass tack. It cannot be linked.
+# Every clue has its own accent colour.
 #
 # It only handles its own input and reports what happened through signals.
 # The board decides what a link means and where cards may stand.
@@ -13,6 +16,8 @@ extends Control
 #   - press on the round pin and drag: start a link (the board draws the string)
 #   - Enter / A while the card has focus: "activated" (keyboard and controller linking)
 
+# The player pressed the tack of a Conclusion. It is finished, so no string starts. The board says a line.
+signal settled_pressed(card: Control)
 signal hovered(card: Control)
 signal moved(card: Control)
 signal move_finished(card: Control)
@@ -21,18 +26,28 @@ signal link_drag_started(card: Control)
 signal link_drag_moved(card: Control, global_mouse: Vector2)
 signal link_drag_released(card: Control, global_mouse: Vector2)
 signal activated(card: Control)
+# Fired when a card that was dragged is let go. The board uses the mouse position to see if it landed on the tray.
+signal dropped(card: Control, global_mouse: Vector2)
 
 enum Mode { NONE, MOVING, LINKING }
 
-const CARD_SIZE: Vector2 = Vector2(260.0, 190.0)
-const PIN_CENTER: Vector2 = Vector2(130.0, 20.0)
-const PIN_GRAB_RADIUS: float = 26.0
+# The card is designed on a 260 x 190 sheet and drawn smaller by CARD_SCALE. All the drawing code
+# below uses the design sheet. Text and spacing are scaled separately so the letters stay sharp.
+const DESIGN_SIZE: Vector2 = Vector2(260.0, 190.0)
+const CARD_SCALE: float = 0.8
+const CARD_SIZE: Vector2 = Vector2(208.0, 152.0)
+const PIN_CENTER: Vector2 = Vector2(104.0, 16.0)
+const PIN_GRAB_RADIUS: float = 22.0
 const MOVE_STEP_PX: float = 16.0
 const CLICK_MAX_TRAVEL_PX: float = 6.0
 const CORNER_RADIUS: int = 14
 const HOVER_SCALE: float = 1.035
 const STYLE_PHOTO: String = "photo"
 const STYLE_NOTE: String = "note"
+const STYLE_LEAD: String = "lead"
+const STYLE_CONCLUSION: String = "conclusion"
+const LOOSE_END_LENGTH: float = 34.0
+const FONT: Font = preload("res://assets/fonts/KleeOne-SemiBold.ttf")
 
 const INK: Color = Color(0.1, 0.08, 0.17)
 const CREAM: Color = Color(0.98, 0.95, 0.89)
@@ -40,6 +55,18 @@ const PARCHMENT: Color = Color(0.99, 0.95, 0.84)
 const CAPTION_INK: Color = Color(0.13, 0.1, 0.22)
 const FOCUS_COLOR: Color = Color(1.0, 0.86, 0.5)
 const TARGET_COLOR: Color = Color(1.0, 1.0, 1.0)
+const DEDUCTION_PAPER: Color = Color(0.957, 0.914, 0.812)
+const DEDUCTION_RULE: Color = Color(0.847, 0.78, 0.639, 0.6)
+const DEDUCTION_INK: Color = Color(0.169, 0.114, 0.078)
+const DEDUCTION_BORDER: Color = Color(0.231, 0.165, 0.118)
+const DEDUCTION_SEPIA: Color = Color(0.478, 0.384, 0.282)
+const BRASS: Color = Color(0.85, 0.68, 0.3)
+const GOLD: Color = Color(0.98, 0.8, 0.36)
+const GOLD_SOFT: Color = Color(1.0, 0.9, 0.6)
+const CONCLUSION_PAPER: Color = Color(0.957, 0.914, 0.812)  # #f4e9cf
+const LEAD_PAPER: Color = Color(0.953, 0.918, 0.827)  # #f3ead3
+const GOLD_FOIL: Color = Color(0.851, 0.678, 0.302)  # #d9ad4d
+const RED_MARGIN: Color = Color(0.557, 0.169, 0.149, 0.4)
 
 var evidence_id: String = ""
 var display_name: String = ""
@@ -60,7 +87,14 @@ var highlighted: bool = false:
 var selected: bool = false:
 	set(value):
 		selected = value
-		set_process(value)
+		_update_processing()
+		queue_redraw()
+
+# A soft "look at me" glow, used by the hint system. It is gentler than `selected`.
+var hinted: bool = false:
+	set(value):
+		hinted = value
+		_update_processing()
 		queue_redraw()
 
 var _mode: Mode = Mode.NONE
@@ -72,6 +106,13 @@ var _focus_from_mouse: bool = false
 var _glow_time: float = 0.0
 var _tween: Tween
 var _hover_tween: Tween
+var _sway_time: float = 0.0
+var _loose_amount: float = 1.0  # 0..1, the loose end of a Lead drops in
+var _appear_tween: Tween
+# The question a Conclusion answers, shown small on top ("ANSWERS · Is the photo real?"). Empty = no line.
+var answers_text: String = ""
+# False for a Conclusion: it is finished, so no string can start from it.
+var linkable: bool = true
 
 var _body_style: StyleBoxFlat
 var _glow_style: StyleBoxFlat
@@ -86,7 +127,10 @@ var _note_header_style: StyleBoxFlat
 
 func _ready() -> void:
 	size = CARD_SIZE
+	custom_minimum_size = CARD_SIZE
 	pivot_offset = CARD_SIZE * 0.5
+	pin.position = Vector2(116.0, 6.0) * CARD_SCALE
+	pin.scale = Vector2(CARD_SCALE, CARD_SCALE)
 	focus_mode = Control.FOCUS_ALL
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -95,6 +139,7 @@ func _ready() -> void:
 	mouse_exited.connect(_on_mouse_exited)
 	focus_entered.connect(_on_focus_entered)
 	focus_exited.connect(_on_focus_exited)
+	pin.pivot_offset = pin.size * 0.5
 	set_process(false)
 
 
@@ -102,14 +147,21 @@ func setup(id: String, card_name: String, card_description: String, style: Strin
 	evidence_id = id
 	display_name = card_name
 	description = card_description
-	card_style = style if style == STYLE_PHOTO else STYLE_NOTE
+	card_style = style if style == STYLE_PHOTO or style == STYLE_LEAD or style == STYLE_CONCLUSION else STYLE_NOTE
+	linkable = card_style != STYLE_CONCLUSION
 	accent = accent_color
 	name_label.text = card_name
 	_apply_text_layout()
 	_build_styles()
 	# A very small fixed tilt per card (about -1.5 to +1.5 degrees) so the board feels hand-pinned.
 	rotation = deg_to_rad(float(posmod(hash(id), 5) - 2) * 0.75)
+	_update_processing()
 	queue_redraw()
+
+
+# A Lead keeps redrawing (its loose end sways); other cards only while glowing.
+func _update_processing() -> void:
+	set_process(selected or hinted or card_style == STYLE_LEAD)
 
 
 # Where the pin is, in global coordinates (the board attaches strings here).
@@ -135,8 +187,70 @@ func pulse() -> void:
 	_tween.tween_property(self, "scale", Vector2.ONE, 0.18)
 
 
+# A new card drops in: it grows from small with a little bounce.
+func pop_in() -> void:
+	if _hover_tween != null:
+		_hover_tween.kill()
+	scale = Vector2(0.55, 0.55)
+	modulate.a = 0.0
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(self, "scale", Vector2.ONE, 0.34).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(self, "modulate:a", 1.0, 0.18)
+
+
+# A new Lead appears where the two cards met: the page fades in, the title writes itself from left to
+# right (pencil_write), then the pin pushes in (pin_push) and the loose end drops.
+func appear_lead() -> void:
+	_stop_appear()
+	modulate.a = 0.0
+	name_label.visible_ratio = 0.0
+	pin.modulate.a = 0.0
+	_loose_amount = 0.0
+	queue_redraw()
+	_appear_tween = create_tween()
+	_appear_tween.tween_property(self, "modulate:a", 1.0, 0.12)
+	_appear_tween.tween_callback(Audio.play.bind("pencil_write"))
+	_appear_tween.tween_property(name_label, "visible_ratio", 1.0, 0.5)
+	_appear_tween.tween_callback(_push_pin.bind("pin_push"))
+	_appear_tween.tween_interval(0.1)
+	_appear_tween.tween_method(
+		func(amount: float) -> void:
+			_loose_amount = amount
+			queue_redraw(),
+		0.0, 1.0, 0.3
+	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+
+# A new Conclusion flips in (scale.x 0 to 1 with a slight overshoot), the tack pushes in and the
+# chime plays.
+func appear_conclusion() -> void:
+	_stop_appear()
+	modulate.a = 1.0
+	scale = Vector2(0.0, 1.0)
+	pin.modulate.a = 0.0
+	_appear_tween = create_tween()
+	_appear_tween.tween_property(self, "scale:x", 1.0, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_appear_tween.tween_callback(_push_pin.bind("conclusion_chime"))
+
+
+func _push_pin(sound_id: String) -> void:
+	Audio.play(sound_id)
+	pin.modulate.a = 1.0
+	pin.scale = Vector2(1.4, 1.4) * CARD_SCALE
+	create_tween().tween_property(pin, "scale", Vector2(CARD_SCALE, CARD_SCALE), 0.1).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+
+
+func _stop_appear() -> void:
+	if _appear_tween != null:
+		_appear_tween.kill()
+	name_label.visible_ratio = 1.0
+	pin.modulate.a = 1.0
+	_loose_amount = 1.0
+
+
 func _process(delta: float) -> void:
 	_glow_time += delta
+	_sway_time += delta
 	queue_redraw()
 
 
@@ -152,10 +266,14 @@ func _gui_input(event: InputEvent) -> void:
 		else:
 			_on_release(button.position)
 		accept_event()
-	elif event is InputEventMouseMotion and _mode != Mode.NONE:
+	elif event is InputEventMouseMotion:
 		var motion: InputEventMouseMotion = event
-		_on_motion(motion.position)
-		accept_event()
+		# The tack of a finished Conclusion is not a handle: the cursor stays an arrow over it.
+		var over_tack: bool = not linkable and motion.position.distance_to(PIN_CENTER) <= PIN_GRAB_RADIUS
+		mouse_default_cursor_shape = Control.CURSOR_ARROW if over_tack else Control.CURSOR_POINTING_HAND
+		if _mode != Mode.NONE:
+			_on_motion(motion.position)
+			accept_event()
 	elif (event is InputEventKey or event is InputEventJoypadButton) and _focus_from_mouse:
 		# The player switched to keyboard / pad: show where the focus is.
 		_focus_from_mouse = false
@@ -171,6 +289,9 @@ func _gui_input(event: InputEvent) -> void:
 func _on_press(local_pos: Vector2) -> void:
 	_focus_from_mouse = true
 	grab_focus()
+	if not linkable and local_pos.distance_to(PIN_CENTER) <= PIN_GRAB_RADIUS:
+		settled_pressed.emit(self)
+		return
 	if local_pos.distance_to(PIN_CENTER) <= PIN_GRAB_RADIUS:
 		_mode = Mode.LINKING
 		link_drag_started.emit(self)
@@ -200,6 +321,7 @@ func _on_release(local_pos: Vector2) -> void:
 			clicked.emit(self)
 		else:
 			move_finished.emit(self)
+			dropped.emit(self, global_mouse)
 	elif finished_mode == Mode.LINKING:
 		link_drag_released.emit(self, global_mouse)
 
@@ -277,19 +399,40 @@ func _animate_hover(target_scale: float) -> void:
 
 func _apply_text_layout() -> void:
 	name_label.add_theme_color_override("font_color", CAPTION_INK)
-	if card_style == STYLE_PHOTO:
+	name_label.max_lines_visible = -1
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	if card_style == STYLE_LEAD:
+		# Written on the ruled lines of a notebook page, to the right of the red margin line.
+		name_label.add_theme_color_override("font_color", DEDUCTION_INK)
+		name_label.max_lines_visible = 2
+		_set_margins(44, 52, 20, 40)
+		name_label.add_theme_font_size_override("font_size", _px(24))
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	elif card_style == STYLE_CONCLUSION:
+		name_label.add_theme_color_override("font_color", DEDUCTION_INK)
+		name_label.max_lines_visible = 2
+		_set_margins(26, 44, 26, 44)
+		name_label.add_theme_font_size_override("font_size", _px(25))
+	elif card_style == STYLE_PHOTO:
 		# Caption strip under the photo.
-		margin.add_theme_constant_override("margin_top", 124)
-		margin.add_theme_constant_override("margin_bottom", 6)
-		margin.add_theme_constant_override("margin_left", 18)
-		margin.add_theme_constant_override("margin_right", 18)
-		name_label.add_theme_font_size_override("font_size", 20)
+		_set_margins(18, 124, 18, 6)
+		name_label.add_theme_font_size_override("font_size", _px(20))
 	else:
-		margin.add_theme_constant_override("margin_top", 46)
-		margin.add_theme_constant_override("margin_bottom", 18)
-		margin.add_theme_constant_override("margin_left", 22)
-		margin.add_theme_constant_override("margin_right", 22)
-		name_label.add_theme_font_size_override("font_size", 24)
+		_set_margins(22, 46, 22, 18)
+		name_label.add_theme_font_size_override("font_size", _px(24))
+
+
+func _px(design_pixels: float) -> int:
+	return int(round(design_pixels * CARD_SCALE))
+
+
+func _set_margins(left: int, top: int, right: int, bottom: int) -> void:
+	margin.add_theme_constant_override("margin_left", _px(left))
+	margin.add_theme_constant_override("margin_top", _px(top))
+	margin.add_theme_constant_override("margin_right", _px(right))
+	margin.add_theme_constant_override("margin_bottom", _px(bottom))
 
 
 # ---------- styles ----------
@@ -305,7 +448,15 @@ func _make_box(fill: Color, outline: Color, outline_width: int, radius: int) -> 
 
 func _build_styles() -> void:
 	var paper: Color = CREAM if card_style == STYLE_PHOTO else PARCHMENT
-	_body_style = _make_box(paper, INK, 3, CORNER_RADIUS)
+	var outline: Color = INK
+	var outline_width: int = 3
+	var radius: int = CORNER_RADIUS
+	if card_style == STYLE_CONCLUSION:
+		paper = CONCLUSION_PAPER
+		outline = DEDUCTION_BORDER
+		outline_width = 2
+		radius = 8
+	_body_style = _make_box(paper, outline, outline_width, radius)
 	_body_style.shadow_color = Color(0.0, 0.0, 0.0, 0.5)
 	_body_style.shadow_size = 16
 	_body_style.shadow_offset = Vector2(0.0, 8.0)
@@ -329,16 +480,27 @@ func _rng() -> RandomNumberGenerator:
 func _draw() -> void:
 	if _body_style == null:
 		return
-	var whole: Rect2 = Rect2(Vector2.ZERO, size)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2(CARD_SCALE, CARD_SCALE))
+	var whole: Rect2 = Rect2(Vector2.ZERO, DESIGN_SIZE)
 	if selected:
 		var beat: float = 0.5 + 0.5 * sin(_glow_time * 3.2)
 		_glow_style.shadow_color = Color(accent.lerp(Color.WHITE, 0.25), 0.5 + 0.3 * beat)
 		_glow_style.shadow_size = 22 + int(10.0 * beat)
 		draw_style_box(_glow_style, whole)
-	draw_style_box(_body_style, whole)
+	elif hinted:
+		var soft: float = 0.5 + 0.5 * sin(_glow_time * 2.2)
+		_glow_style.shadow_color = Color(1.0, 0.97, 0.7, 0.6 + 0.3 * soft)
+		_glow_style.shadow_size = 24 + int(10.0 * soft)
+		draw_style_box(_glow_style, whole)
+	if card_style == STYLE_LEAD:
+		_draw_lead()
+	else:
+		draw_style_box(_body_style, whole)
 	if card_style == STYLE_PHOTO:
 		_draw_photo()
-	else:
+	elif card_style == STYLE_CONCLUSION:
+		_draw_conclusion()
+	elif card_style == STYLE_NOTE:
 		_draw_note()
 	if highlighted:
 		_ring_style.border_color = TARGET_COLOR
@@ -346,24 +508,105 @@ func _draw() -> void:
 	elif has_focus() and not _focus_from_mouse:
 		_ring_style.border_color = FOCUS_COLOR
 		draw_style_box(_ring_style, whole.grow(6.0))
+	if card_style == STYLE_LEAD:
+		_draw_loose_end()
+
+
+# The jagged top edge of a Lead. About 18 teeth, seeded by the card id so it never changes.
+func _torn_edge() -> PackedVector2Array:
+	var rng: RandomNumberGenerator = _rng()
+	var points: PackedVector2Array = PackedVector2Array()
+	var teeth: int = 18
+	for index: int in range(teeth + 1):
+		var x: float = DESIGN_SIZE.x * float(index) / float(teeth)
+		points.append(Vector2(x, 12.0 + rng.randf_range(-6.0, 6.0)))
+	return points
+
+
+# A page torn from James's notebook: cream paper, ruled lines, a red margin line, a torn top edge.
+func _draw_lead() -> void:
+	var tear: PackedVector2Array = _torn_edge()
+	var outline: PackedVector2Array = tear.duplicate()
+	outline.append(Vector2(DESIGN_SIZE.x, DESIGN_SIZE.y - 2.0))
+	outline.append(Vector2(0.0, DESIGN_SIZE.y - 2.0))
+	# A soft drop shadow, made of three offset copies.
+	for offset: float in [10.0, 6.0, 3.0]:
+		var shadow: PackedVector2Array = PackedVector2Array()
+		for point: Vector2 in outline:
+			shadow.append(point + Vector2(1.0, offset))
+		draw_colored_polygon(shadow, Color(0.0, 0.0, 0.0, 0.16))
+	draw_colored_polygon(outline, LEAD_PAPER)
+	# A faint shadow just under the tear.
+	var under: PackedVector2Array = PackedVector2Array()
+	for point: Vector2 in tear:
+		under.append(point + Vector2(0.0, 4.0))
+	draw_polyline(under, Color(0.35, 0.25, 0.15, 0.18), 3.0, true)
+	for line_y: float in [66.0, 96.0, 126.0, 156.0]:
+		draw_line(Vector2(6.0, line_y), Vector2(DESIGN_SIZE.x - 6.0, line_y), Color(0.796, 0.714, 0.561, 0.7), 1.3, true)
+	draw_line(Vector2(34.0, 18.0), Vector2(34.0, DESIGN_SIZE.y - 3.0), RED_MARGIN, 1.6, true)
+	draw_polyline(tear, Color(0.5, 0.4, 0.28, 0.7), 1.4, true)
+	# A pencil note in the corner: "this goes somewhere".
+	var note: Vector2 = Vector2(DESIGN_SIZE.x - 56.0, DESIGN_SIZE.y - 18.0)
+	draw_line(note + Vector2(0.0, -5.0), note + Vector2(16.0, -5.0), Color(0.3, 0.27, 0.25, 0.7), 1.8, true)
+	draw_polyline(PackedVector2Array([note + Vector2(11.0, -10.0), note + Vector2(17.0, -5.0), note + Vector2(11.0, 0.0)]), Color(0.3, 0.27, 0.25, 0.7), 1.8, true)
+	draw_string(FONT, note + Vector2(24.0, 2.0), "?", HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20, Color(0.3, 0.27, 0.25, 0.75))
+
+
+# A short piece of string hangs from the pin and sways: this thread has not been tied off yet.
+func _draw_loose_end() -> void:
+	if _loose_amount <= 0.01:
+		return
+	draw_set_transform(Vector2.ZERO)
+	var swing: float = deg_to_rad(4.0) * sin(_sway_time * TAU / 2.4)
+	var length: float = LOOSE_END_LENGTH * _loose_amount
+	var start: Vector2 = PIN_CENTER
+	var tip: Vector2 = start + Vector2(sin(swing), cos(swing)) * length
+	var middle: Vector2 = start.lerp(tip, 0.5) + Vector2(cos(swing), -sin(swing)) * 2.0
+	var points: PackedVector2Array = PackedVector2Array([start, middle, tip])
+	draw_polyline(points, Color(0.0, 0.0, 0.0, 0.3), 5.0, true)
+	draw_polyline(points, accent.darkened(0.35), 4.0, true)
+	draw_polyline(points, accent, 2.6, true)
+	draw_circle(tip, 3.2, accent.darkened(0.2))
+
+
+# A finished conclusion: heavy cream card, dark border, gold hairline, a gold foil corner, the question
+# it answers on top, and the title with a hand-drawn underline.
+func _draw_conclusion() -> void:
+	_photo_frame_style.border_color = Color(BRASS, 0.85)
+	_photo_frame_style.set_border_width_all(2)
+	_photo_frame_style.set_corner_radius_all(4)
+	draw_style_box(_photo_frame_style, Rect2(Vector2(6.0, 6.0), DESIGN_SIZE - Vector2(12.0, 12.0)))
+	var corner: PackedVector2Array = PackedVector2Array([Vector2(DESIGN_SIZE.x - 44.0, 3.0), Vector2(DESIGN_SIZE.x - 3.0, 3.0), Vector2(DESIGN_SIZE.x - 3.0, 44.0)])
+	draw_colored_polygon(corner, GOLD_FOIL)
+	draw_polyline(corner, Color(1.0, 0.93, 0.62, 0.9), 1.2, true)
+	draw_line(Vector2(DESIGN_SIZE.x - 30.0, 3.0), Vector2(DESIGN_SIZE.x - 3.0, 30.0), Color(1.0, 1.0, 0.85, 0.35), 1.2, true)
+	if answers_text != "":
+		draw_multiline_string(FONT, Vector2(22.0, 46.0), "ANSWERS · " + answers_text, HORIZONTAL_ALIGNMENT_LEFT, DESIGN_SIZE.x - 78.0, 12, 2, DEDUCTION_SEPIA)
+	# A short, slightly wavy flourish under the title.
+	var points: PackedVector2Array = PackedVector2Array()
+	var x: float = 0.0
+	while x <= 96.0:
+		points.append(Vector2(DESIGN_SIZE.x * 0.5 - 48.0 + x, 156.0 + sin(x * 0.17) * 1.8))
+		x += 4.0
+	draw_polyline(points, Color(DEDUCTION_INK, 0.75), 1.8, true)
 
 
 func _draw_note() -> void:
 	# Coloured header strip like a notepad, with the pin on it.
-	draw_style_box(_note_header_style, Rect2(Vector2(3.0, 3.0), Vector2(size.x - 6.0, 32.0)))
-	draw_line(Vector2(3.0, 35.0), Vector2(size.x - 3.0, 35.0), Color(0.0, 0.0, 0.0, 0.18), 2.0, true)
-	draw_line(Vector2(3.0, 33.0), Vector2(size.x - 3.0, 33.0), Color(1.0, 1.0, 1.0, 0.25), 1.5, true)
+	draw_style_box(_note_header_style, Rect2(Vector2(3.0, 3.0), Vector2(DESIGN_SIZE.x - 6.0, 32.0)))
+	draw_line(Vector2(3.0, 35.0), Vector2(DESIGN_SIZE.x - 3.0, 35.0), Color(0.0, 0.0, 0.0, 0.18), 2.0, true)
+	draw_line(Vector2(3.0, 33.0), Vector2(DESIGN_SIZE.x - 3.0, 33.0), Color(1.0, 1.0, 1.0, 0.25), 1.5, true)
 	# Soft ruled lines.
 	for line_y: float in [152.0, 172.0]:
-		draw_line(Vector2(18.0, line_y), Vector2(size.x - 72.0, line_y), Color(0.45, 0.55, 0.85, 0.2), 1.5, true)
-	# A faint rubber stamp in the corner.
-	var stamp: Vector2 = Vector2(size.x - 40.0, size.y - 38.0)
-	draw_arc(stamp, 20.0, 0.0, TAU, 48, Color(accent, 0.5), 2.5, true)
-	draw_arc(stamp, 14.0, 0.0, TAU, 40, Color(accent, 0.35), 1.5, true)
-	draw_circle(stamp, 4.0, Color(accent, 0.45))
+		draw_line(Vector2(18.0, line_y), Vector2(DESIGN_SIZE.x - 72.0, line_y), Color(0.45, 0.55, 0.85, 0.2), 1.5, true)
+	# A faint ink ring in the corner, like a cup left on the page.
+	var ring: Vector2 = Vector2(DESIGN_SIZE.x - 40.0, DESIGN_SIZE.y - 38.0)
+	draw_arc(ring, 20.0, 0.0, TAU, 48, Color(accent, 0.5), 2.5, true)
+	draw_arc(ring, 14.0, 0.0, TAU, 40, Color(accent, 0.35), 1.5, true)
+	draw_circle(ring, 4.0, Color(accent, 0.45))
 	# Soft light across the top of the paper.
 	draw_polygon(
-		PackedVector2Array([Vector2(3.0, 36.0), Vector2(size.x - 3.0, 36.0), Vector2(size.x - 3.0, 80.0), Vector2(3.0, 80.0)]),
+		PackedVector2Array([Vector2(3.0, 36.0), Vector2(DESIGN_SIZE.x - 3.0, 36.0), Vector2(DESIGN_SIZE.x - 3.0, 80.0), Vector2(3.0, 80.0)]),
 		PackedColorArray([Color(1.0, 1.0, 1.0, 0.28), Color(1.0, 1.0, 1.0, 0.28), Color(1.0, 1.0, 1.0, 0.0), Color(1.0, 1.0, 1.0, 0.0)])
 	)
 
@@ -431,12 +674,12 @@ func _draw_photo() -> void:
 
 	# Washi tape on the top corners, in the clue's colour.
 	for side: float in [-1.0, 1.0]:
-		var corner: Vector2 = Vector2(size.x * 0.5 + side * 108.0, 14.0)
-		draw_set_transform(corner, deg_to_rad(side * -34.0))
+		var corner: Vector2 = Vector2(DESIGN_SIZE.x * 0.5 + side * 108.0, 14.0)
+		draw_set_transform(corner * CARD_SCALE, deg_to_rad(side * -34.0), Vector2(CARD_SCALE, CARD_SCALE))
 		draw_rect(Rect2(Vector2(-27.0, -9.0), Vector2(54.0, 18.0)), Color(accent, 0.88))
 		draw_rect(Rect2(Vector2(-27.0, -3.0), Vector2(54.0, 3.0)), Color(1.0, 1.0, 1.0, 0.35))
 		draw_rect(Rect2(Vector2(-27.0, 3.0), Vector2(54.0, 3.0)), Color(1.0, 1.0, 1.0, 0.2))
-		draw_set_transform(Vector2.ZERO)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(CARD_SCALE, CARD_SCALE))
 
 
 # A smooth rolling ridge line across the photo, made from three sine waves.
@@ -463,6 +706,13 @@ func _fill_ridge(ridge: PackedVector2Array, area: Rect2, color: Color) -> void:
 
 func _draw_pin() -> void:
 	var center: Vector2 = pin.size * 0.5
+	if card_style == STYLE_CONCLUSION:
+		# A flat brass tack with no grab ring: this card is finished.
+		pin.draw_circle(center + Vector2(1.5, 3.0), 9.0, Color(0.0, 0.0, 0.0, 0.3))
+		pin.draw_circle(center, 9.0, BRASS.darkened(0.45))
+		pin.draw_circle(center, 7.6, BRASS)
+		pin.draw_circle(center + Vector2(-1.5, -1.5), 3.0, BRASS.lightened(0.35))
+		return
 	pin.draw_circle(center + Vector2(2.0, 4.0), 11.0, Color(0.0, 0.0, 0.0, 0.35))
 	if _linking:
 		pin.draw_circle(center, 15.0, Color(1.0, 1.0, 1.0, 0.9))

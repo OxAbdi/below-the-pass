@@ -1,0 +1,126 @@
+{
+  "_notes": "One-shot sound effects. Files live in res://assets/audio/sfx/ as .ogg. A missing file plays nothing (one warning per id). pitch_jitter randomises the pitch a little so repeats do not sound copied.",
+  "folder": "res://assets/audio/sfx/",
+  "sounds": {
+    "notebook_pickup": {
+      "file": "notebook_pickup.ogg",
+      "volume_db": -4.0,
+      "pitch_jitter": 0.04,
+      "what": "notebook slid off a desk and lifted"
+    },
+    "band_snap": {
+      "file": "band_snap.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.05,
+      "what": "elastic band released"
+    },
+    "cover_open": {
+      "file": "cover_open.ogg",
+      "volume_db": -4.0,
+      "pitch_jitter": 0.03,
+      "what": "stiff cover flipped over a wire binding"
+    },
+    "page_settle": {
+      "file": "page_settle.ogg",
+      "volume_db": -8.0,
+      "pitch_jitter": 0.04,
+      "what": "soft paper settle"
+    },
+    "cover_close": {
+      "file": "cover_close.ogg",
+      "volume_db": -4.0,
+      "pitch_jitter": 0.03,
+      "what": "cover shut, soft leather thud"
+    },
+    "notebook_down": {
+      "file": "notebook_down.ogg",
+      "volume_db": -5.0,
+      "pitch_jitter": 0.04,
+      "what": "notebook set on wood"
+    },
+    "page_rustle": {
+      "file": "page_rustle.ogg",
+      "volume_db": -10.0,
+      "pitch_jitter": 0.08,
+      "what": "small paper rustle"
+    },
+    "pin_push": {
+      "file": "pin_push.ogg",
+      "volume_db": -4.0,
+      "pitch_jitter": 0.06,
+      "what": "pin into cork"
+    },
+    "card_lift": {
+      "file": "card_lift.ogg",
+      "volume_db": -8.0,
+      "pitch_jitter": 0.06,
+      "what": "card pulled off cork"
+    },
+    "string_tie": {
+      "file": "string_tie.ogg",
+      "volume_db": -4.0,
+      "pitch_jitter": 0.04,
+      "what": "string pulled tight and knotted"
+    },
+    "string_snap": {
+      "file": "string_snap.ogg",
+      "volume_db": -5.0,
+      "pitch_jitter": 0.04,
+      "what": "string twang and snap back"
+    },
+    "pencil_write": {
+      "file": "pencil_write.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.05,
+      "what": "short pencil scribble, about 0.5 s"
+    },
+    "conclusion_chime": {
+      "file": "conclusion_chime.ogg",
+      "volume_db": -3.0,
+      "pitch_jitter": 0.0,
+      "what": "single piano chord and soft chime"
+    },
+    "ink_tick": {
+      "file": "ink_tick.ogg",
+      "volume_db": -5.0,
+      "pitch_jitter": 0.05,
+      "what": "quick pen tick on paper"
+    },
+    "choice_hover": {
+      "file": "choice_hover.ogg",
+      "volume_db": -12.0,
+      "pitch_jitter": 0.03,
+      "what": "a paper slip brushed with a fingertip"
+    },
+    "choice_pick": {
+      "file": "choice_pick.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.03,
+      "what": "a quick pen tick on paper"
+    },
+    "pencil_circle": {
+      "file": "pencil_circle.ogg",
+      "volume_db": -8.0,
+      "pitch_jitter": 0.03,
+      "what": "a pencil drawing one quick circle"
+    },
+    "present_slam": {
+      "file": "present_slam.ogg",
+      "volume_db": -3.0,
+      "pitch_jitter": 0.03,
+      "what": "a photo slapped down on a table"
+    },
+    "confront_sting": {
+      "file": "confront_sting.ogg",
+      "volume_db": -4.0,
+      "pitch_jitter": 0.03,
+      "what": "rising cello and one drum accent, short"
+    },
+    "wrong_present": {
+      "file": "wrong_present.ogg",
+      "volume_db": -8.0,
+      "pitch_jitter": 0.03,
+      "what": "papers shuffled back into a folder"
+    }
+  }
+}

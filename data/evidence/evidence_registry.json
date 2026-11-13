@@ -35,6 +35,22 @@
       "chapter": 1,
       "card_style": "note",
       "accent": "#a78bfa"
+    },
+    "ch01_cctv_thursday": {
+      "name": "Café CCTV, Thursday",
+      "description": "A still from the café camera, Thursday at 21:32. Jonah Calloway sits at Katherine's corner table, leaning in to talk to her.",
+      "proves": "jonah_lied",
+      "chapter": 1,
+      "card_style": "photo",
+      "accent": "#7fb3c8"
+    },
+    "ch01_jonah_admission": {
+      "name": "Jonah saw her Thursday",
+      "description": "Caught out, Jonah admits he met Katherine on Thursday. She was shaking, asked him to bring food and to tell nobody. He says he does not know where she sleeps.",
+      "proves": "katherine_alive",
+      "chapter": 1,
+      "card_style": "note",
+      "accent": "#ffb47a"
     }
   }
 }

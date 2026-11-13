@@ -8,6 +8,7 @@
 - Code style: static typing where possible, signals for events, small readable scripts.
 - Save system (later): local JSON, three slots, Steam Cloud via GodotSteam.
 - Music (later): one player per district, crossfaded. Stings use a separate one-shot player.
+- Sound effects: one `Audio` autoload plays one-shot SFX by id from `data/audio/sfx.json` on the `SFX` bus. It holds no game state. A missing sound file plays nothing (one warning), so the game always runs silent-safe.
 - Perspective: top-down 2D for the whole game, exploration and stealth.
 - Movement: free 360-degree movement. Keyboard (WASD and arrows, diagonals allowed at the same speed) and controller stick both work. Sprites show the nearest of 8 facing directions.
 - Controls: keyboard and controller from day one (Steam Deck target). All actions go through the Input Map, never hardcoded keys.
@@ -22,5 +23,6 @@ Read this file, `/docs/art-direction.md` and the current `/docs/milestone-N.md` 
 - Art style: anime / webtoon. Cel-shaded characters with clean ink lines. Full details in `/docs/art-direction.md`.
 - World: one hand-painted top-down illustration per map (slight overhead angle, ink outlines, painterly texture). Not tile-based. Collision, props and interactive objects are placed on top in Godot. Y-sort so characters walk in front of and behind props.
 - Mood: dark and gritty. Grit comes from in-engine lighting (CanvasModulate, PointLight2D, fog and snow particles), not from repainting maps.
+- Case board rule: everything on the board is real evidence or something James wrote by hand. No rubber stamps, UI badges or menu titles. Key hints only in the small context prompt bar.
 - Dialogue: large portrait on the right, soft dark gradient along the bottom, name and text on the left, Klee One font. Animated with `AnimationPlayer`.
 - Reference images are style guides only. Never copy their art.

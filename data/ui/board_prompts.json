@@ -1,0 +1,34 @@
+{
+  "_notes": [
+    "Prompt bar on the Case Board (bottom-right). Each context lists the prompts that make sense right now.",
+    "key: keyboard key text. pad: gamepad glyph (a, b, x, y, lb, rb). mouse: left / right / drag (small mouse icon), or empty.",
+    "label is shown after the glyph. Labels live here so they can be translated later."
+  ],
+  "contexts": {
+    "default": [
+      { "key": "T", "pad": "rb", "mouse": "", "label": "Notebook" },
+      { "key": "Esc", "pad": "b", "mouse": "", "label": "Back" }
+    ],
+    "notebook_entry": [
+      { "key": "", "pad": "a", "mouse": "drag", "label": "Pin to board" },
+      { "key": "T", "pad": "rb", "mouse": "", "label": "Close notebook" }
+    ],
+    "notebook_binding": [
+      { "key": "T", "pad": "rb", "mouse": "left", "label": "Close notebook" }
+    ],
+    "board_card": [
+      { "key": "", "pad": "a", "mouse": "drag", "label": "Move" },
+      { "key": "", "pad": "a", "mouse": "pin", "label": "Drag the pin: Link" },
+      { "key": "Backspace", "pad": "y", "mouse": "", "label": "Unpin" }
+    ],
+    "conclusion": [
+      { "key": "Q", "pad": "x", "mouse": "left", "label": "Read" },
+      { "key": "", "pad": "", "mouse": "drag", "label": "Move" },
+      { "key": "Backspace", "pad": "y", "mouse": "", "label": "Unpin" }
+    ],
+    "dragging_string": [
+      { "key": "", "pad": "a", "mouse": "left", "label": "Release on a card: Link" },
+      { "key": "Esc", "pad": "b", "mouse": "", "label": "Release elsewhere: Cancel" }
+    ]
+  }
+}

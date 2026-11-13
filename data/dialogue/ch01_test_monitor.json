@@ -1,0 +1,52 @@
+{
+  "_notes": [
+    "Test-room stand-in for the café scene (Chapter 1, beat 4): the camera footage that later catches Jonah's lie.",
+    "See docs/milestone-5.md for the conversation format."
+  ],
+  "conversation_id": "ch01_test_monitor",
+  "entries": [
+    {
+      "if": {
+        "flag": "seen:ch01_test_monitor:watch"
+      },
+      "node": "again"
+    },
+    {
+      "node": "watch"
+    }
+  ],
+  "nodes": {
+    "watch": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "The café's camera. Thursday, 21:32."
+        },
+        {
+          "speaker": "james",
+          "text": "Katherine's corner table. And the boy sitting with her is Jonah Calloway."
+        }
+      ],
+      "effects": [
+        {
+          "collect_evidence": "ch01_cctv_thursday"
+        },
+        {
+          "sound": "pin_push"
+        }
+      ],
+      "next": "end"
+    },
+    "again": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Thursday, 21:32. I've seen enough of it."
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

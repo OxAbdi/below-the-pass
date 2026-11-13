@@ -1,8 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/DialogueBox.gd" id="1_script"]
 [ext_resource type="FontFile" path="res://assets/fonts/KleeOne-Regular.ttf" id="2_body"]
 [ext_resource type="FontFile" path="res://assets/fonts/KleeOne-SemiBold.ttf" id="3_name"]
+[ext_resource type="Script" path="res://scripts/ui/ChoiceList.gd" id="4_choices"]
+[ext_resource type="Script" path="res://scripts/mechanics/PromptBar.gd" id="5_prompts"]
+[ext_resource type="Script" path="res://scripts/ui/EvidencePicker.gd" id="6_picker"]
 
 [sub_resource type="Gradient" id="Gradient_shade"]
 offsets = PackedFloat32Array(0, 0.6, 1)
@@ -81,5 +84,48 @@ autowrap_mode = 3
 position = Vector2(440, 238)
 color = Color(0.85, 0.68, 0.3, 1)
 polygon = PackedVector2Array(0, 0, 26, 0, 13, 20)
+
+[node name="Choices" type="Control" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 420.0
+offset_right = 780.0
+offset_bottom = 780.0
+script = ExtResource("4_choices")
+
+[node name="Prompts" type="Control" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 1034.0
+offset_right = 1120.0
+offset_bottom = 1072.0
+mouse_filter = 2
+script = ExtResource("5_prompts")
+prompts_path = "res://data/ui/dialogue_prompts.json"
+
+[node name="Picker" type="Control" parent="."]
+layout_mode = 0
+offset_top = 1080.0
+offset_right = 1920.0
+offset_bottom = 1560.0
+script = ExtResource("6_picker")
+
+[node name="PresentLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Fx" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

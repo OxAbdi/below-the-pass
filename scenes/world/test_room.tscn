@@ -1,10 +1,11 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/TestRoom.gd" id="1_room"]
 [ext_resource type="PackedScene" path="res://scenes/world/player.tscn" id="2_player"]
 [ext_resource type="PackedScene" path="res://scenes/world/prop.tscn" id="3_prop"]
 [ext_resource type="PackedScene" path="res://scenes/world/interactable.tscn" id="4_inter"]
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogue/dialogue_box.tscn" id="5_box"]
+[ext_resource type="Script" path="res://scripts/world/Npc.gd" id="6_npc"]
 
 [sub_resource type="RectangleShape2D" id="Rect_Top"]
 size = Vector2(2560, 260)
@@ -138,6 +139,29 @@ label = "TABLE"
 position = Vector2(700, 580)
 dialogue_id = "desk_note"
 prompt_text = "Examine desk"
+
+[node name="Jonah" type="StaticBody2D" parent="World"]
+position = Vector2(820, 980)
+script = ExtResource("6_npc")
+color = Color(0.42, 0.36, 0.56, 1)
+label = "JONAH"
+
+[node name="JonahTalk" parent="World" instance=ExtResource("4_inter") groups=["interactables"]]
+position = Vector2(820, 980)
+conversation_id = "ch01_jonah_signal_hill"
+prompt_text = "Talk"
+
+[node name="Monitor" parent="World" instance=ExtResource("3_prop")]
+position = Vector2(1900, 520)
+size = Vector2(150, 130)
+footprint_depth = 50.0
+color = Color(0.2, 0.3, 0.36, 1)
+label = "CCTV"
+
+[node name="MonitorInteract" parent="World" instance=ExtResource("4_inter") groups=["interactables"]]
+position = Vector2(1900, 580)
+conversation_id = "ch01_test_monitor"
+prompt_text = "Examine screen"
 
 [node name="Lamp" type="Node2D" parent="World"]
 position = Vector2(560, 470)

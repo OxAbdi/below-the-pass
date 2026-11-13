@@ -9,9 +9,13 @@ signal trust_changed(character: String, new_value: int)
 signal proof_tier_unlocked(tier: int)
 signal choice_made(choice_id: String, value: Variant)
 signal link_made(link_id: String)
+signal card_pinned(card_id: String)
+signal card_unpinned(card_id: String)
+signal question_answered(question_id: String)
+signal flag_changed(flag_id: String, on: bool)
 signal state_reset
 
-const TRUST_MIN: int = 0
+const TRUST_MIN: int = -5  # trust can go below zero when James catches someone lying
 const TRUST_MAX: int = 5
 
 var current_chapter: int = 1
@@ -46,6 +50,23 @@ var board_links: Dictionary = {}
 
 # Case Board card positions. evidence_id -> [x, y] (an array, so it saves to JSON cleanly).
 var board_layout: Dictionary = {}
+
+# Case Board v2. Ids (clues and deductions) currently pinned on the board, in pin order.
+var board_pinned: Array[String] = []
+
+# Case Board. id -> true once the player has looked at that card or question (removes the "new" dot,
+# and stops a question from sliding in a second time).
+var board_seen: Dictionary = {}
+
+# Case Board soft hint. question_id -> number of wrong links tried while that question was the oldest open one.
+var board_wrong_tries: Dictionary = {}
+
+# Case Board. True once James has said the "how to use the board" intro lines (once per save).
+var board_intro_seen: bool = false
+
+# Story flags: small yes/no facts, such as "Jonah has said he last saw her on Tuesday".
+# Conversations write and read these. A flag that is not in here is off.
+var flags: Dictionary = {}
 
 
 func collect_evidence(evidence_id: String) -> void:
@@ -132,6 +153,65 @@ func get_card_position(evidence_id: String, fallback: Vector2) -> Vector2:
 	return fallback
 
 
+func pin_card(card_id: String) -> void:
+	if board_pinned.has(card_id):
+		return
+	board_pinned.append(card_id)
+	card_pinned.emit(card_id)
+
+
+func unpin_card(card_id: String) -> void:
+	if not board_pinned.has(card_id):
+		return
+	board_pinned.erase(card_id)
+	card_unpinned.emit(card_id)
+
+
+func is_pinned(card_id: String) -> bool:
+	return board_pinned.has(card_id)
+
+
+func mark_seen(id: String) -> void:
+	board_seen[id] = true
+
+
+func has_seen(id: String) -> bool:
+	return board_seen.get(id, false)
+
+
+func add_wrong_try(question_id: String) -> int:
+	board_wrong_tries[question_id] = get_wrong_tries(question_id) + 1
+	return board_wrong_tries[question_id]
+
+
+func get_wrong_tries(question_id: String) -> int:
+	return int(board_wrong_tries.get(question_id, 0))
+
+
+# Tells the rest of the game a question was answered. The board calls this once, at the moment the
+# answering link locks. Which questions are answered is worked out from board_links, not stored.
+func announce_question_answered(question_id: String) -> void:
+	question_answered.emit(question_id)
+
+
+func set_flag(flag_id: String) -> void:
+	if flags.has(flag_id):
+		return
+	flags[flag_id] = true
+	flag_changed.emit(flag_id, true)
+
+
+func clear_flag(flag_id: String) -> void:
+	if not flags.has(flag_id):
+		return
+	flags.erase(flag_id)
+	flag_changed.emit(flag_id, false)
+
+
+func has_flag(flag_id: String) -> bool:
+	return flags.has(flag_id)
+
+
 func reset() -> void:
 	current_chapter = 1
 	current_scene_id = ""
@@ -144,6 +224,11 @@ func reset() -> void:
 	choices.clear()
 	board_links.clear()
 	board_layout.clear()
+	board_pinned.clear()
+	board_seen.clear()
+	board_wrong_tries.clear()
+	board_intro_seen = false
+	flags.clear()
 	state_reset.emit()
 
 
@@ -162,6 +247,11 @@ func get_save_data() -> Dictionary:
 		"choices": choices.duplicate(),
 		"board_links": board_links.duplicate(),
 		"board_layout": board_layout.duplicate(true),
+		"board_pinned": board_pinned.duplicate(),
+		"board_seen": board_seen.duplicate(),
+		"board_wrong_tries": board_wrong_tries.duplicate(),
+		"board_intro_seen": board_intro_seen,
+		"flags": flags.duplicate(),
 	}
 
 
@@ -186,3 +276,12 @@ func load_save_data(data: Dictionary) -> void:
 	choices = data.get("choices", {}).duplicate()
 	board_links = data.get("board_links", {}).duplicate()
 	board_layout = data.get("board_layout", {}).duplicate(true)
+	board_pinned.assign(data.get("board_pinned", []))
+	board_seen = data.get("board_seen", {}).duplicate()
+	board_intro_seen = bool(data.get("board_intro_seen", false))
+	flags.clear()
+	for flag_id: Variant in (data.get("flags", {}) as Dictionary):
+		flags[str(flag_id)] = true
+	var saved_tries: Dictionary = data.get("board_wrong_tries", {})
+	for question_id: Variant in saved_tries:
+		board_wrong_tries[str(question_id)] = int(saved_tries[question_id])

@@ -19,7 +19,7 @@ const DialogueBoxScript := preload("res://scripts/ui/DialogueBox.gd")
 @export var camera_follow_speed: float = 9.0
 const CAMERA_HEIGHT_OFFSET := Vector2(0, -60)
 
-const BUILD := "M2 build 6"   # shown on screen, so we know which version is running
+const BUILD := "M5 build 1"   # shown on screen, so we know which version is running
 
 const NIGHT_COLOR := Color(0.3, 0.36, 0.56)
 const DAY_COLOR := Color(0.86, 0.88, 0.98)
@@ -81,9 +81,12 @@ func set_lighting(on: bool) -> void:
 	_refresh_info()
 
 
-func _on_interacted(dialogue_id: String) -> void:
+func _on_interacted(id: String, kind: String) -> void:
 	player.set_frozen(true)
-	dialogue.play_dialogue(dialogue_id)
+	if kind == "conversation":
+		dialogue.play_conversation(id)
+	else:
+		dialogue.play_dialogue(id)
 
 
 func _on_dialogue_finished() -> void:
@@ -91,5 +94,5 @@ func _on_dialogue_finished() -> void:
 
 
 func _refresh_info() -> void:
-	info.text = "Move: WASD / arrows / left stick     Interact: E / pad A     Lighting (%s): L     Facing: %s" % [
+	info.text = "Move: WASD / arrows / left stick     Interact: E / pad A     Present evidence: Q / pad Y     Lighting (%s): L     Facing: %s" % [
 		"NIGHT" if night else "DAY", player.facing_name()]

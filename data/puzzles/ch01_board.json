@@ -1,20 +1,50 @@
 {
   "_notes": [
-    "Grey-box test board for Milestone 3. The final Chapter 1 board is set later.",
-    "cards: evidence ids (from data/evidence/evidence_registry.json). A card only shows if the player holds that evidence. Order sets the default grid position, so do not reorder after release.",
-    "reaction_name: name shown above the text-only reaction lines.",
-    "links[].pair: two evidence ids, in any order. deduction is the short tag on the locked string, line is what is said when it locks.",
+    "Case Board v2 (Milestone 4). Placeholder story for the tech spike. The final Chapter 1 board is set later.",
+    "cards: evidence ids (from data/evidence/evidence_registry.json). Sets the order of clues in the tray.",
+    "max_pinned: how many cards the board holds at once. board_full_line is said when the player tries to pin one more.",
+    "questions[]: an open question card. It appears once the player holds any card in its answer pair. answered_by is a link_id.",
+    "links[].pair: two ids, in any order. Either two clues, or two deduction_ids (a big question). Clue + deduction is not allowed.",
+    "links[].deduction / deduction_text / deduction_id: the deduction card the pair folds into, its reading text, and its id.",
+    "line: what James says when the link locks. appear_line: what James says when a question first appears.",
     "wrong_reactions[].pair: a wrong pair that gets its own line. Any other wrong pair uses fallback_reactions in turn.",
-    "already_linked_line: said when the player tries a pair that is already locked."
+    "ch01_q_lie and ch01_ded_two_lies are placeholder story. Check against the GDD Chapter 1 outline before release.",
+    "case_title + chapter_file: the paper case tag on the board (chapter number and title are read from chapter_file).",
+    "intro_lines: said once per save the first time the board opens. settled_line: said when the player tries to link a finished conclusion.",
+    "empty_notes_text / empty_notebook_text: faint pencil text on the case-notes page and in an empty notebook.",
+    "A deduction used in another link's pair is a Lead (still combines). Otherwise it is a Conclusion (finished). Worked out, not stored."
   ],
   "board_id": "ch01_board",
-  "title": "CASE BOARD - Chapter 1",
+  "case_title": "The Last Crossing",
+  "chapter_file": "res://data/chapters/chapter_01.json",
   "reaction_name": "James Flint",
+  "max_pinned": 6,
+  "board_full_line": "The board's full. Take something down.",
   "cards": [
     "ch01_shadow_directions",
     "ch01_snowbank_depth",
     "ch01_logo_patch",
     "ch01_anniversary_leaflet"
+  ],
+  "questions": [
+    {
+      "question_id": "ch01_q_real",
+      "text": "Is the photo real?",
+      "appear_line": "Something about this print is wrong.",
+      "answered_by": "ch01_link_staged"
+    },
+    {
+      "question_id": "ch01_q_changed",
+      "text": "Was it changed later?",
+      "appear_line": "This print has been touched since it was taken.",
+      "answered_by": "ch01_link_retouched"
+    },
+    {
+      "question_id": "ch01_q_lie",
+      "text": "What is The Last Crossing?",
+      "appear_line": "Two lies in one photograph. What does that make it?",
+      "answered_by": "ch01_link_two_lies"
+    }
   ],
   "links": [
     {
@@ -23,7 +53,9 @@
         "ch01_shadow_directions",
         "ch01_snowbank_depth"
       ],
+      "deduction_id": "ch01_ded_staged",
       "deduction": "The scene was built",
+      "deduction_text": "Two light sources and a snowbank nobody recorded. The rescue scene was staged.",
       "line": "Two light sources, and a snowbank nobody recorded that night. Someone built this scene."
     },
     {
@@ -32,8 +64,21 @@
         "ch01_logo_patch",
         "ch01_anniversary_leaflet"
       ],
+      "deduction_id": "ch01_ded_retouched",
       "deduction": "Retouched after 2016",
+      "deduction_text": "The 2016 leaflet prints the frame without the logo. Someone edited the photo after that.",
       "line": "The 2016 leaflet prints the same frame, and there's no logo in it. Someone went back into this photo after that."
+    },
+    {
+      "link_id": "ch01_link_two_lies",
+      "pair": [
+        "ch01_ded_staged",
+        "ch01_ded_retouched"
+      ],
+      "deduction_id": "ch01_ded_two_lies",
+      "deduction": "A lie, told twice",
+      "deduction_text": "Staged in 1996 and altered again after 2016. Someone is still protecting this photograph.",
+      "line": "Staged once, then fixed again twenty years later. Someone is still guarding this lie."
     }
   ],
   "wrong_reactions": [
@@ -57,5 +102,11 @@
     "I'm forcing it. Look again.",
     "Close, but that isn't the thread."
   ],
-  "already_linked_line": "We've already got that."
+  "already_linked_line": "We've already got that.",
+  "intro_lines": [
+    "Pin what I've found. Tie together what belongs together."
+  ],
+  "settled_line": "That one's settled. Nothing left to tie it to.",
+  "empty_notes_text": "Nothing worked out yet.",
+  "empty_notebook_text": "Nothing yet. Look closer."
 }
