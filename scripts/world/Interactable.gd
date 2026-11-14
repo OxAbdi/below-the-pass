@@ -1,7 +1,5 @@
-extends Area2D
-## Anything James can press "interact" on. It holds the id of something to play (a file name in
-## data/dialogue/) and shouts a signal. It does NOT play it itself: the room listens and decides
-## what happens.
+extends "res://scripts/world/Hotspot.gd"
+## The old name for a Hotspot, kept so the test room still works. New maps use Hotspot.gd.
 ##
 ## Fill in ONE of the two ids:
 ##   dialogue_id      - plain lines that play top to bottom (a note on a desk)
@@ -14,16 +12,6 @@ const KIND_CONVERSATION: String = "conversation"
 
 @export var dialogue_id: String = ""
 @export var conversation_id: String = ""
-@export var prompt_text: String = "Examine"
-
-@onready var prompt: Label = $Prompt
-
-
-func _ready() -> void:
-	collision_layer = 4   # layer 3 "interactables"
-	collision_mask = 0
-	prompt.text = "[E]  " + prompt_text
-	prompt.visible = false
 
 
 func interact() -> void:
@@ -31,7 +19,3 @@ func interact() -> void:
 		interacted.emit(conversation_id, KIND_CONVERSATION)
 	else:
 		interacted.emit(dialogue_id, KIND_DIALOGUE)
-
-
-func set_prompt_visible(shown: bool) -> void:
-	prompt.visible = shown

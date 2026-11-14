@@ -3,6 +3,7 @@ extends CharacterBody2D
 ## 8-way facing, and an interaction reach. Placeholder art is drawn in code.
 
 signal facing_changed(direction_name: String)
+signal arrived   # a walk_to() reached its target
 
 const DIRECTION_NAMES: Array[String] = ["E", "SE", "S", "SW", "W", "NW", "N", "NE"]
 
@@ -13,6 +14,10 @@ const DIRECTION_NAMES: Array[String] = ["E", "SE", "S", "SW", "W", "NW", "N", "N
 var frozen: bool = false
 var facing_index: int = 2          # start facing South (toward the camera)
 var current_target: Node = null    # the interactable in reach, if any
+var auto_walking: bool = false     # true while a cutscene walks James somewhere
+
+var _auto_target: Vector2 = Vector2.ZERO
+var _auto_speed: float = 280.0
 
 @onready var reach: Area2D = $InteractReach
 
@@ -35,6 +40,9 @@ func set_frozen(value: bool) -> void:
 ## James moves once per drawn frame (not on the physics clock), so he and the
 ## camera share one clock and can never drift apart (that drift = vibration).
 func _process(raw_delta: float) -> void:
+	if auto_walking:
+		_step_auto_walk(minf(raw_delta, 1.0 / 30.0))
+		return
 	if frozen:
 		return
 	var delta: float = minf(raw_delta, 1.0 / 30.0)   # a lag spike must not let him jump through a wall
@@ -50,6 +58,27 @@ func _process(raw_delta: float) -> void:
 	_update_target(_nearest_interactable())
 
 
+## Walks James to `target` by himself (in a cutscene). Await it to wait until he gets there.
+## He walks straight there, through anything in the way, so plan cutscene paths with clear floor.
+func walk_to(target: Vector2, speed: float = 280.0) -> void:
+	_auto_target = target
+	_auto_speed = speed
+	auto_walking = true
+	velocity = Vector2.ZERO
+	await arrived
+
+
+func _step_auto_walk(delta: float) -> void:
+	var to_go: Vector2 = _auto_target - global_position
+	if to_go.length() <= _auto_speed * delta:
+		global_position = _auto_target
+		auto_walking = false
+		arrived.emit()
+		return
+	_set_facing(to_go.angle())
+	global_position += to_go.normalized() * _auto_speed * delta
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if frozen:
 		return
@@ -63,6 +92,15 @@ func _set_facing(angle: float) -> void:
 	if index < 0:
 		index += 8
 	if index != facing_index:
+		facing_index = index
+		facing_changed.emit(DIRECTION_NAMES[facing_index])
+		queue_redraw()
+
+
+## Turns James to one of the eight directions by name ("N", "SE"...). Used when he arrives on a map.
+func set_facing_name(direction_name: String) -> void:
+	var index: int = DIRECTION_NAMES.find(direction_name)
+	if index >= 0 and index != facing_index:
 		facing_index = index
 		facing_changed.emit(DIRECTION_NAMES[facing_index])
 		queue_redraw()

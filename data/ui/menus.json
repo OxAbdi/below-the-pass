@@ -1,0 +1,85 @@
+{
+  "_notes": [
+    "Every word on the title screen, the pause menu, the save cards and the chapter card.",
+    "%s and %d are filled in by the game (a number, a name). Keep them when you change a text."
+  ],
+  "title": {
+    "game_title": "Below the Pass",
+    "tagline": "A photograph is the only witness that never changes its story.",
+    "print_label": "PHOTOGRAPH",
+    "continue": "Continue",
+    "new_game": "New Game",
+    "load": "Load",
+    "settings": "Settings",
+    "quit": "Quit",
+    "press_any": "Press any button",
+    "desc_continue": "%s. Chapter %d, %s played.",
+    "desc_new": "Begin the story on the last train over the Harrow Pass.",
+    "desc_load": "Pick up a saved game.",
+    "desc_settings": "Text, sound, controls and accessibility. Coming soon.",
+    "desc_quit": "Close the game. Northvale will wait."
+  },
+  "pause": {
+    "chapter": "Chapter %d",
+    "current_lead": "Current lead",
+    "no_lead": "Nothing to chase right now.",
+    "resume": "Resume",
+    "case_board": "Case board",
+    "save": "Save",
+    "load": "Load",
+    "settings": "Settings",
+    "quit_to_title": "Quit to title",
+    "quit_confirm": "Unsaved progress since the last autosave will be lost.",
+    "play_time": "Play time %s",
+    "last_saved": "Last saved %s",
+    "never_saved": "Not saved yet",
+    "desc_resume": "Back to Northvale.",
+    "desc_case_board": "Pin, link and question what you have found.",
+    "desc_save": "Keep your place in one of three slots.",
+    "desc_load": "Go back to a saved moment.",
+    "desc_settings": "Text, sound, controls and accessibility. Coming soon.",
+    "desc_quit": "Quit to the title screen.",
+    "quit_question": "Return to the title?",
+    "place": "%s · %s",
+    "slot": "Slot %d"
+  },
+  "slots": {
+    "heading_new": "New game: choose a slot",
+    "heading_load": "Load a save",
+    "heading_save": "Save in which slot?",
+    "slot": "Slot %d",
+    "empty": "Empty",
+    "chapter": "Chapter %d",
+    "damaged": "Damaged save",
+    "restore_backup": "Restore backup",
+    "no_backup": "No backup to restore",
+    "restore_confirm": "Restore this save from its backup?",
+    "overwrite_confirm": "Overwrite this save?",
+    "delete_confirm": "Delete this save?",
+    "saved": "Saved",
+    "hint_choose": "Select",
+    "hint_delete": "Delete",
+    "hint_back": "Back"
+  },
+  "confirm": {
+    "yes": "Yes",
+    "no": "No"
+  },
+  "chapter_card": {
+    "chapter": "Chapter %d",
+    "end": "End of chapter"
+  },
+  "saving": "Saving…",
+  "debug": {
+    "jump_heading": "Jump to a beat (debug)"
+  },
+  "hints": {
+    "move": "Move",
+    "interact": "Look / Talk",
+    "pause": "Pause"
+  },
+  "cinematic": {
+    "hold_to_skip": "Hold to skip",
+    "art_needed": "Art needed"
+  }
+}

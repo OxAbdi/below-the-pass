@@ -1,0 +1,221 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/game/MapBase.gd" id="1_map"]
+[ext_resource type="PackedScene" path="res://scenes/world/prop.tscn" id="2_prop"]
+[ext_resource type="Script" path="res://scripts/world/Hotspot.gd" id="3_hotspot"]
+[ext_resource type="Script" path="res://scripts/world/Npc.gd" id="4_npc"]
+[ext_resource type="Script" path="res://scripts/world/SpawnPoint.gd" id="5_spawn"]
+[ext_resource type="Script" path="res://scripts/world/PhaseLights.gd" id="6_lights"]
+[ext_resource type="Script" path="res://scripts/world/Exit.gd" id="7_exit"]
+[ext_resource type="Script" path="res://scripts/world/Blocker.gd" id="8_blocker"]
+
+[sub_resource type="RectangleShape2D" id="Rect_Top"]
+size = Vector2(1920, 240)
+
+[sub_resource type="RectangleShape2D" id="Rect_Bottom"]
+size = Vector2(1920, 60)
+
+[sub_resource type="RectangleShape2D" id="Rect_Side"]
+size = Vector2(60, 1080)
+
+[sub_resource type="Gradient" id="Gradient_light"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Texture_light"]
+gradient = SubResource("Gradient_light")
+width = 512
+height = 512
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="DevA" type="Node2D"]
+script = ExtResource("1_map")
+map_id = "dev_a"
+
+[node name="Floor" type="ColorRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+color = Color(0.55, 0.45, 0.36, 1)
+
+[node name="BackWall" type="ColorRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 240.0
+mouse_filter = 2
+color = Color(0.35, 0.27, 0.25, 1)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="Top" type="CollisionShape2D" parent="Walls"]
+position = Vector2(960.0, 120)
+shape = SubResource("Rect_Top")
+
+[node name="Bottom" type="CollisionShape2D" parent="Walls"]
+position = Vector2(960.0, 1110)
+shape = SubResource("Rect_Bottom")
+
+[node name="Left" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-30, 540.0)
+shape = SubResource("Rect_Side")
+
+[node name="Right" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1950, 540.0)
+shape = SubResource("Rect_Side")
+
+[node name="Actors" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Spawns" type="Node2D" parent="."]
+
+[node name="Focus" type="Node2D" parent="."]
+
+[node name="Bounds" type="ReferenceRect" parent="."]
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+
+[node name="PhaseLights" type="Node" parent="."]
+script = ExtResource("6_lights")
+
+[node name="Desk" parent="Actors" instance=ExtResource("2_prop")]
+position = Vector2(600, 470)
+size = Vector2(260, 110)
+footprint_depth = 50.0
+color = Color(0.5, 0.33, 0.24, 1)
+label = "DESK"
+
+[node name="DeskSpot" type="Area2D" parent="Actors"]
+position = Vector2(600, 530)
+script = ExtResource("3_hotspot")
+action = "conversation"
+target = "dev_desk"
+prompt_text = "Examine desk"
+
+[node name="BoardProp" parent="Actors" instance=ExtResource("2_prop")]
+position = Vector2(1000, 330)
+size = Vector2(240, 170)
+footprint_depth = 30.0
+color = Color(0.45, 0.32, 0.22, 1)
+label = "CASE BOARD"
+
+[node name="BoardSpot" type="Area2D" parent="Actors"]
+position = Vector2(1000, 380)
+script = ExtResource("3_hotspot")
+action = "board"
+prompt_text = "Case board"
+
+[node name="Door" parent="Actors" instance=ExtResource("2_prop")]
+position = Vector2(1500, 300)
+size = Vector2(150, 230)
+footprint_depth = 30.0
+color = Color(0.3, 0.24, 0.3, 1)
+label = "DOOR"
+
+[node name="DoorSpot" type="Area2D" parent="Actors"]
+position = Vector2(1500, 340)
+script = ExtResource("3_hotspot")
+action = "door"
+prompt_text = "Go outside"
+to_map = "dev_b"
+to_spawn = "door"
+
+[node name="LockedDoor" parent="Actors" instance=ExtResource("2_prop")]
+position = Vector2(300, 300)
+size = Vector2(150, 230)
+footprint_depth = 30.0
+color = Color(0.26, 0.2, 0.2, 1)
+label = "LOCKED"
+
+[node name="LockedSpot" type="Area2D" parent="Actors"]
+position = Vector2(300, 340)
+script = ExtResource("3_hotspot")
+action = "door"
+prompt_text = "Open"
+to_map = "dev_b"
+to_spawn = "door"
+locked_conversation = "dev_locked"
+open_if_flag = "dev_key"
+
+[node name="Bed" parent="Actors" instance=ExtResource("2_prop")]
+position = Vector2(1600, 940)
+size = Vector2(260, 130)
+footprint_depth = 70.0
+color = Color(0.4, 0.42, 0.55, 1)
+label = "BED"
+
+[node name="BedSpot" type="Area2D" parent="Actors"]
+position = Vector2(1600, 1000)
+script = ExtResource("3_hotspot")
+action = "conversation"
+target = "dev_bed"
+prompt_text = "Sleep"
+phases = PackedStringArray("night")
+
+[node name="Clerk" type="StaticBody2D" parent="Actors"]
+position = Vector2(1100, 800)
+script = ExtResource("4_npc")
+color = Color(0.55, 0.4, 0.3, 1)
+label = "CLERK"
+phases = PackedStringArray("day")
+
+[node name="ClerkSpot" type="Area2D" parent="Actors"]
+position = Vector2(1100, 800)
+script = ExtResource("3_hotspot")
+action = "conversation"
+target = "dev_clerk"
+prompt_text = "Talk"
+phases = PackedStringArray("day")
+
+[node name="Lamp" type="PointLight2D" parent="Actors" groups=["mains"]]
+position = Vector2(560, 330)
+color = Color(1, 0.72, 0.4, 1)
+energy = 0.9
+texture = SubResource("Texture_light")
+texture_scale = 2.2
+
+[node name="Candle" type="PointLight2D" parent="Actors" groups=["candles"]]
+position = Vector2(1300, 620)
+color = Color(1, 0.6, 0.3, 1)
+energy = 1.3
+texture = SubResource("Texture_light")
+texture_scale = 1.5
+
+[node name="start" type="Marker2D" parent="Spawns"]
+position = Vector2(400, 800)
+script = ExtResource("5_spawn")
+facing = "S"
+
+[node name="door" type="Marker2D" parent="Spawns"]
+position = Vector2(1500, 440)
+script = ExtResource("5_spawn")
+facing = "S"
+
+[node name="corner" type="Marker2D" parent="Focus"]
+position = Vector2(1100, 760)
+
+[node name="beside_james" type="Marker2D" parent="Focus"]
+position = Vector2(560, 790)
+
+[node name="desk_front" type="Marker2D" parent="Focus"]
+position = Vector2(600, 640)
+
+[node name="Conductor" type="StaticBody2D" parent="Actors"]
+position = Vector2(1500, 470)
+script = ExtResource("4_npc")
+color = Color(0.25, 0.3, 0.45, 1)
+label = "CONDUCTOR"
+show_if_flag = "dev_conductor_here"
+hide_if_flag = "dev_conductor_gone"
+
+[node name="ConductorSpot" type="Area2D" parent="Actors"]
+position = Vector2(1500, 470)
+script = ExtResource("3_hotspot")
+action = "conversation"
+target = "dev_conductor"
+prompt_text = "Talk"
+show_if_flag = "dev_conductor_here"
+hide_if_flag = "dev_conductor_gone"

@@ -1,0 +1,28 @@
+{
+  "conversation_id": "dev_enter_b",
+  "_notes": "Test chapter: a map's arrival talk. It says something only the first time.",
+  "entries": [
+    {
+      "if": {
+        "seen": "intro"
+      },
+      "node": "end"
+    },
+    {
+      "node": "intro"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Snow. Of course there's snow.",
+          "style": "thought"
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

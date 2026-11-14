@@ -1,0 +1,20 @@
+{
+  "_notes": [
+    "Music tracks. Files live in res://assets/audio/music/ as .ogg (set them to loop in the Import tab). A missing file plays nothing.",
+    "volume_db: 0 is full volume, -6 is about half as loud.",
+    "what: a short brief for the composer (or the music AI)."
+  ],
+  "folder": "res://assets/audio/music/",
+  "tracks": {
+    "title_theme": {
+      "file": "title_theme.ogg",
+      "volume_db": -4.0,
+      "what": "Main theme. Sparse and intimate: a lone acoustic guitar or piano, soft strings far behind, snow-quiet. Melancholy but warm, a small-town mystery in winter. Loops."
+    },
+    "ch01_intro": {
+      "file": "ch01_intro.ogg",
+      "volume_db": -4.0,
+      "what": "Opening of Chapter 1: a night train climbing a mountain pass. Starts calm, the theme's melody on one instrument, then tension as the snow comes. About 60 seconds, ends on a held note."
+    }
+  }
+}

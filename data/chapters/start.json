@@ -1,0 +1,4 @@
+{
+  "_notes": "Which chapter file the game starts. Milestone 6 part C changes this to chapter_01.json.",
+  "chapter_file": "res://data/chapters/dev_chapter.json"
+}

@@ -1,0 +1,156 @@
+{
+  "_notes": [
+    "A tiny test chapter for the game frame (Milestone 6 part A). Not part of the story.",
+    "start: where a new game begins. 'opening' is a conversation played on black before the first picture.",
+    "phases: the times of day. power = lights in group 'mains' are on. candles = lights in group 'candles' are on. snow = heavy / light / none (outside maps only). instant = the change cuts instead of fading.",
+    "beats: the story, in order. A beat is done when 'complete_when' passes; then 'on_complete' runs, in order.",
+    "lead: shown in the pause menu only. auto_play: a conversation that starts by itself on that map, once.",
+    "debug_grant: what a player who reached this beat would hold, and where they would stand (F9 beat jumper, debug builds only).",
+    "board: the case board file this chapter uses.",
+    "start.opening may be a conversation id, or a list of effects played on black before the first picture (here: Chapter 1's opening film).",
+    "auto_play may start a conversation ({\"map\", \"conversation\"}) or a cutscene ({\"map\", \"cutscene\"})."
+  ],
+  "chapter": 1,
+  "title": "Test Chapter",
+  "board": "res://data/puzzles/ch01_board.json",
+  "start": {
+    "map": "dev_a",
+    "spawn": "start",
+    "phase": "day",
+    "opening": [
+      {
+        "cinematic": "ch01_intro"
+      }
+    ]
+  },
+  "phases": {
+    "day": {
+      "name": "Day",
+      "power": true,
+      "candles": false,
+      "snow": "light"
+    },
+    "night": {
+      "name": "Night",
+      "power": false,
+      "candles": true,
+      "snow": "heavy",
+      "instant": true
+    }
+  },
+  "beats": [
+    {
+      "id": "dev_b1",
+      "lead": "Look at the desk.",
+      "complete_when": {
+        "flag": "dev_desk_seen"
+      },
+      "on_complete": [
+        {
+          "notice": {
+            "name": "James Flint",
+            "text": "One desk, examined. The case is wide open."
+          }
+        },
+        {
+          "autosave": true
+        }
+      ],
+      "auto_play": {
+        "map": "dev_a",
+        "cutscene": "dev_arrival"
+      },
+      "debug_grant": {
+        "phase": "day",
+        "map": "dev_a",
+        "spawn": "start",
+        "flags": [],
+        "evidence": [],
+        "links": []
+      }
+    },
+    {
+      "id": "dev_b2",
+      "lead": "Go outside and talk to the stranger.",
+      "complete_when": {
+        "flag": "dev_talked"
+      },
+      "on_complete": [
+        {
+          "cutaway": {
+            "map": "dev_a",
+            "focus": "corner",
+            "caption": "Meanwhile, indoors",
+            "conversation": "dev_cutaway"
+          }
+        },
+        {
+          "scene_card": {
+            "text": "Night"
+          }
+        },
+        {
+          "set_phase": "night"
+        },
+        {
+          "move_player": {
+            "map": "dev_a",
+            "spawn": "start"
+          }
+        },
+        {
+          "play": "dev_night"
+        },
+        {
+          "autosave": true
+        }
+      ],
+      "debug_grant": {
+        "phase": "day",
+        "map": "dev_a",
+        "spawn": "door",
+        "flags": [
+          "dev_desk_seen"
+        ],
+        "evidence": [
+          "ch01_anniversary_leaflet"
+        ],
+        "links": []
+      }
+    },
+    {
+      "id": "dev_b3",
+      "lead": "Get some sleep.",
+      "complete_when": {
+        "flag": "dev_end"
+      },
+      "on_complete": [
+        {
+          "end_chapter": {
+            "chapter": 1,
+            "epilogue": [
+              {
+                "name": "Helen",
+                "style": "voice",
+                "text": "One day, somebody will want to know exactly who was in this room tonight."
+              }
+            ]
+          }
+        }
+      ],
+      "debug_grant": {
+        "phase": "night",
+        "map": "dev_a",
+        "spawn": "start",
+        "flags": [
+          "dev_desk_seen",
+          "dev_talked"
+        ],
+        "evidence": [
+          "ch01_anniversary_leaflet"
+        ],
+        "links": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "conversation_id": "dev_cutaway",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "style": "action",
+          "text": "The room, with nobody in it. The lamp hums."
+        },
+        {
+          "speaker": "katherine",
+          "text": "He doesn't know I'm watching this bit."
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

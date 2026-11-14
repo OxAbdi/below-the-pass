@@ -1,0 +1,74 @@
+{
+  "_notes": [
+    "A test cutscene for the game frame: James thinks about what Kessler said, the conductor walks in, speaks, walks out, and James walks to the desk by himself.",
+    "map: the map it plays on. bars: the black cut-away bars stay in for the whole cutscene. Steps are listed in scripts/game/Game.gd."
+  ],
+  "map": "dev_a",
+  "bars": true,
+  "caption": "",
+  "steps": [
+    {
+      "wait": 0.6
+    },
+    {
+      "play": "dev_train_thought"
+    },
+    {
+      "effects": [
+        {
+          "set_flag": "dev_conductor_here"
+        }
+      ]
+    },
+    {
+      "wait": 0.5
+    },
+    {
+      "walk": {
+        "who": "Conductor",
+        "to": "beside_james",
+        "speed": 260
+      }
+    },
+    {
+      "face": {
+        "who": "james",
+        "dir": "E"
+      }
+    },
+    {
+      "play": "dev_conductor"
+    },
+    {
+      "walk": {
+        "who": "Conductor",
+        "to": "door",
+        "speed": 300,
+        "wait": false
+      }
+    },
+    {
+      "walk": {
+        "who": "james",
+        "to": "desk_front",
+        "speed": 240
+      }
+    },
+    {
+      "face": {
+        "who": "james",
+        "dir": "N"
+      }
+    },
+    {
+      "effects": [
+        {
+          "set_flag": "dev_conductor_gone"
+        }
+      ]
+    },
+    {
+      "play": "dev_welcome"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "_notes": [
+    "The title screen's moving picture and music.",
+    "painting: the finished painting and what moves in it. All positions are in painting pixels (the picture is 2576 x 1438).",
+    "  image / masks: the picture, and a small image drawn to match it. In the masks, red = curtains that sway, green = glass where the blizzard blows, blue = the warm lamp light on the wall.",
+    "  lights: lit windows in the storm. at = centre, radius, color, strength (0-1), flare = a streak of light across the glass.",
+    "  mug: where the steam starts. glint: where the camera lens catches the light now and then.",
+    "  curtain_px: how far the folds inside a curtain can slide (the outline never moves).",
+    "layers: optional extra full-screen images, back to front, if the painting is ever replaced by separate layers. depth 0 barely moves, 1 drifts the most.",
+    "If the painting's files are missing the game paints its own simple stand-in (a frosted window at night).",
+    "music: an id from data/audio/music.json. Silent until the file exists.",
+    "art_brief: what the painting shows, as a prompt for making a new or alternative version."
+  ],
+  "painting": {
+    "image": "res://assets/art/title/title_painting.jpg",
+    "masks": "res://assets/art/title/title_masks.png",
+    "size": [2576, 1438],
+    "curtain_px": 30,
+    "lights": [
+      { "at": [1643, 975], "radius": 36, "color": "#ffb866", "strength": 0.8 },
+      { "at": [1793, 979], "radius": 40, "color": "#ffbf7a", "strength": 0.8 },
+      { "at": [2025, 976], "radius": 48, "color": "#ffb060", "strength": 1.0, "flare": true },
+      { "at": [1615, 1021], "radius": 30, "color": "#ffc680", "strength": 0.45 },
+      { "at": [2030, 1021], "radius": 28, "color": "#ffc680", "strength": 0.45 },
+      { "at": [2127, 1058], "radius": 24, "color": "#ffc680", "strength": 0.4 }
+    ],
+    "mug": [1618, 1086],
+    "glint": [1958, 1126]
+  },
+  "layers": [],
+  "music": "title_theme",
+  "art_brief": "Anime-style painting, 16:9, night. A tall frosted window in a bare, peeling plaster wall: icicles on the panes, a blizzard and a moonlit storm cloud outside, a few warm lit windows far off in the town. Thin sheer curtains hang either side, the left one torn and trailing. On the sill: a steaming white mug and an old 35 mm film camera with its strap hanging down, snow drifted on the wood. Inked outlines, painterly texture, deep slate-blue light with one warm amber glow on the wall at the lower left. The left third stays dark and quiet for the menu. Quiet, lonely, beautiful."
+}

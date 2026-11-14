@@ -69,15 +69,15 @@ How to read it:
 
 ### Scene 1: The last train (night)
 
-*(Black screen. Kessler's voice, a memory. Calm, cool, a woman who never needs to raise her voice.)*
+*(Black screen. White text, alone:)* Winter, 1986. The forecast promised a clear night over the Harrow Pass.
 
-**KESSLER:** It's a box, Flint. You carry it over the pass, you hand it to the county clerk, you come home. Try not to solve anything.
+*(The pass, clear and starlit. Then the snow arrives. The title. Then a train carriage: snow hammering the window. James, alone, a sealed evidence box on his knees. The train shudders and stops.)*
 
-*(White text:)* Winter, 1986. The forecast promised a clear night over the Harrow Pass.
+**JAMES (thinking):** The box hasn't moved in two hours. Neither has anything else.
 
-*(A train carriage. Snow hammering the window. James, alone, a sealed evidence box on his knees. The train shudders and stops.)*
+**KESSLER (a memory, voice only):** It's a box, Flint. You carry it over the pass, you hand it to the county clerk, you come home. Try not to solve anything.
 
-**JAMES (thinking):** Two months a detective. Two months of carrying boxes. At this rate I'll make inspector by the time I'm a hundred and four.
+**JAMES (thinking):** Try not to solve anything. Two months a detective. Two months of carrying boxes. At this rate I'll make inspector by the time I'm a hundred and four.
 
 *(Arthur Bellamy opens the carriage door, snow on his cap, pocket watch in hand.)*
 

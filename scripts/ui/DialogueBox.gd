@@ -39,6 +39,11 @@ const FADE_SECONDS: float = 0.35
 const NOTICE_TYPE_SPEEDUP: float = 2.5
 const EXPRESSION_FADE_SECONDS: float = 0.15
 const PROMPTS_PATH: String = "res://data/ui/dialogue_prompts.json"
+const THOUGHT_NAME_SUFFIX: String = " (thinking)"
+const THOUGHT_NAME_COLOR: Color = Color(0.66, 0.64, 0.6)
+const ACTION_TEXT_COLOR: Color = Color(0.96, 0.93, 0.84, 0.8)
+const VOICE_EDGE_COLOR: Color = Color(0.96, 0.93, 0.84, 0.55)
+const ITALIC_SLANT: float = 0.2
 const PRESENT_ACTION: String = "present_evidence"
 
 # The present moment: the folder drops, the card rises and lands, then it holds.
@@ -115,6 +120,9 @@ var _fx_tween: Tween
 var _card_tween: Tween
 var _expression_tween: Tween
 var _prompt_texts: Dictionary = {}
+var _line_style: String = ""
+var _body_font: Font
+var _italic_font: FontVariation
 
 static var _folder_checked: bool = false
 
@@ -134,6 +142,11 @@ func _ready() -> void:
 	picker.cancelled.connect(_close_picker)
 	prompts.set_suppressed(true)
 	_vignette_tex = _make_vignette()
+	# Klee One has no italic, so thoughts and stage directions use the same font, slanted.
+	_body_font = text_label.get_theme_font("normal_font")
+	_italic_font = FontVariation.new()
+	_italic_font.base_font = _body_font
+	_italic_font.variation_transform = Transform2D(Vector2(1.0, 0.0), Vector2(ITALIC_SLANT, 1.0), Vector2.ZERO)
 	_ensure_present_action()
 	_build_animations()
 	anim.animation_finished.connect(_on_animation_finished)
@@ -184,6 +197,12 @@ func play_lines(new_lines: Array, is_blocking: bool = true, seconds: float = 3.0
 
 func show_notice(title: String, body: String, seconds: float = 3.0) -> void:
 	play_lines([{ "name": title, "text": body }], false, seconds)
+
+
+# Closes whatever is showing at once (used when a cinematic is skipped).
+func close_now() -> void:
+	if is_open:
+		_close()
 
 
 func in_conversation() -> bool:
@@ -293,6 +312,10 @@ func _play_node(node_id: String) -> void:
 	_node_id = node_id
 	_conversation.begin_node(node_id)
 	mode = Mode.READING
+	if _conversation.is_silent(node_id):
+		# Effects only: show nothing and move straight on.
+		_play_node(_conversation.next_of(node_id))
+		return
 	var node_lines: Array = _conversation.node(node_id).get("lines", [])
 	if node_lines.is_empty():
 		# A node with no lines (a list of topics). The last line stays on screen behind it.
@@ -314,7 +337,7 @@ func _after_node_lines() -> void:
 		return
 	mode = Mode.CHOOSING
 	_stop_hint()
-	choices.show_choices(options)
+	choices.show_choices(options, _conversation.choice_tag(_node_id))
 	_refresh_prompts()
 
 
@@ -381,7 +404,7 @@ func _back_to_where_we_were() -> void:
 		mode = Mode.CHOOSING
 		choices.visible = true
 		if not choices.is_showing:
-			choices.show_choices(_conversation.visible_choices(_node_id))
+			choices.show_choices(_conversation.visible_choices(_node_id), _conversation.choice_tag(_node_id))
 	else:
 		mode = Mode.READING
 		_on_typed()
@@ -481,6 +504,14 @@ func _resolve_present() -> void:
 		pause.tween_interval(CAUGHT_PAUSE)
 		pause.tween_callback(_play_node.bind(caught_node))
 		return
+	if result.has("reaction"):
+		# Not a lie, but this person has something to say about it. The card stays up while they do.
+		evidence_presented.emit(_present_id, false)
+		_card_lines_left = CARD_LINES_ON_SCREEN
+		var beat: Tween = create_tween()
+		beat.tween_interval(0.25)
+		beat.tween_callback(_play_node.bind(str(result["reaction"])))
+		return
 	# Not what he is hiding: the card goes back down and he says so.
 	evidence_presented.emit(_present_id, false)
 	Audio.play("wrong_present")
@@ -532,12 +563,32 @@ func _show_line(index: int, instant: bool = false) -> void:
 	var info: Dictionary = portraits.get(speaker_id, {})
 	if speaker_id != "" and info.is_empty():
 		push_warning("DialogueBox: no portrait entry for '%s' in %s" % [speaker_id, portraits_path])
-	var has_portrait: bool = not info.is_empty()
+	# A line's "style" changes how it is shown:
+	#   thought  James thinking: his portrait, a pencil-grey "(thinking)" name, slanted text
+	#   action   a stage direction: no name, no portrait, slanted text
+	#   voice    a voice with no face (a phone call): the name only, and a thin pencil edge
+	_line_style = str(line.get("style", ""))
+	var has_portrait: bool = not info.is_empty() and _line_style != "action" and _line_style != "voice"
 	var shown_name: String = str(line.get("name", info.get("display_name", speaker_id)))
+	var name_color: Color = Color.html(str(line.get("name_color", info.get("name_color", "#d9ad4d"))))
+	var slanted: bool = false
+	var text_color: Color = Color.WHITE
+	match _line_style:
+		"thought":
+			shown_name += THOUGHT_NAME_SUFFIX
+			name_color = THOUGHT_NAME_COLOR
+			slanted = true
+		"action":
+			shown_name = ""
+			slanted = true
+			text_color = ACTION_TEXT_COLOR
 
 	name_label.text = shown_name
 	name_label.visible = shown_name != ""
-	name_label.add_theme_color_override("font_color", Color.html(str(info.get("name_color", "#d9ad4d"))))
+	name_label.add_theme_color_override("font_color", name_color)
+	text_label.add_theme_font_override("normal_font", _italic_font if slanted else _body_font)
+	text_label.add_theme_color_override("default_color", text_color)
+	fx.queue_redraw()
 	text_label.text = str(line.get("text", ""))
 	text_label.visible_ratio = 0.0
 	_stop_hint()
@@ -628,6 +679,8 @@ func _close() -> void:
 		type_tween.kill()
 	typing = false
 	is_open = false
+	_line_style = ""
+	fx.queue_redraw()
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_reset_talk()
 	_refresh_prompts()
@@ -772,6 +825,15 @@ func _draw_fx() -> void:
 		fx.draw_rect(whole, Color(1.0, 0.95, 0.85, 0.25 * flash_amount))
 	if _vignette_amount > 0.0:
 		fx.draw_texture_rect(_vignette_tex, whole, false, Color(1.0, 1.0, 1.0, 0.3 * _vignette_amount))
+	if _line_style == "voice" and is_open:
+		# A voice with no face: a thin pencil line down the left of the text, where a quote mark would be.
+		var top: Vector2 = text_home + Vector2(-26.0, 6.0)
+		var points: PackedVector2Array = PackedVector2Array()
+		var y: float = 0.0
+		while y <= 150.0:
+			points.append(top + Vector2(sin(y * 0.16) * 1.5, y))
+			y += 3.0
+		fx.draw_polyline(points, VOICE_EDGE_COLOR, 2.0, true)
 
 
 # Grey-box stand-in: a tall rectangle with a simple silhouette, drawn only while a portrait has

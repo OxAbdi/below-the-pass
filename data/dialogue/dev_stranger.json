@@ -1,0 +1,20 @@
+{
+  "conversation_id": "dev_stranger",
+  "partner": "katherine",
+  "nodes": {
+    "intro": {
+      "lines": [
+        {
+          "speaker": "katherine",
+          "text": "You found me. Something will happen indoors now, and then it will be night."
+        }
+      ],
+      "effects": [
+        {
+          "set_flag": "dev_talked"
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

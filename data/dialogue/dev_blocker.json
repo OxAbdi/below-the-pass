@@ -1,0 +1,16 @@
+{
+  "conversation_id": "dev_blocker",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Snow to the knees and rising. One more step and they'll find me in spring.",
+          "style": "thought"
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

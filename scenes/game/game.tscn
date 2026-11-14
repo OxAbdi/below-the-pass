@@ -1,0 +1,112 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://scripts/game/Game.gd" id="1_game"]
+[ext_resource type="Script" path="res://scripts/game/ChapterDirector.gd" id="2_director"]
+[ext_resource type="Script" path="res://scripts/ui/Letterbox.gd" id="3_letterbox"]
+[ext_resource type="Script" path="res://scripts/ui/ChapterCard.gd" id="4_card"]
+[ext_resource type="Script" path="res://scripts/ui/FadeLayer.gd" id="5_fade"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogue/dialogue_box.tscn" id="6_dialogue"]
+[ext_resource type="Script" path="res://scripts/ui/PauseMenu.gd" id="7_pause"]
+[ext_resource type="Script" path="res://scripts/ui/SaveIndicator.gd" id="8_saving"]
+[ext_resource type="Script" path="res://scripts/ui/cinema/Cinematic.gd" id="9_film"]
+[ext_resource type="Script" path="res://scripts/ui/ControlsHint.gd" id="10_hint"]
+
+[node name="Game" type="Node"]
+script = ExtResource("1_game")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="Director" type="Node" parent="."]
+script = ExtResource("2_director")
+
+[node name="Board" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="Loupe" type="CanvasLayer" parent="."]
+layer = 22
+
+[node name="Overlay" type="CanvasLayer" parent="."]
+layer = 23
+
+[node name="Letterbox" type="CanvasLayer" parent="."]
+layer = 30
+
+[node name="Bars" type="Control" parent="Letterbox"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("3_letterbox")
+
+[node name="ChapterCard" type="CanvasLayer" parent="."]
+layer = 35
+
+[node name="Card" type="Control" parent="ChapterCard"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("4_card")
+
+[node name="Fade" type="CanvasLayer" parent="."]
+layer = 40
+
+[node name="Curtain" type="Control" parent="Fade"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("5_fade")
+
+[node name="Cinema" type="CanvasLayer" parent="."]
+layer = 42
+
+[node name="Film" type="Control" parent="Cinema"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("9_film")
+
+[node name="Hint" type="CanvasLayer" parent="."]
+layer = 44
+
+[node name="Controls" type="Control" parent="Hint"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("10_hint")
+
+[node name="Dialogue" type="CanvasLayer" parent="."]
+layer = 45
+
+[node name="DialogueBox" parent="Dialogue" instance=ExtResource("6_dialogue")]
+
+[node name="Pause" type="CanvasLayer" parent="."]
+layer = 48
+
+[node name="PauseMenu" type="Control" parent="Pause"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("7_pause")
+
+[node name="SaveIndicator" type="CanvasLayer" parent="."]
+layer = 49
+
+[node name="Saving" type="Control" parent="SaveIndicator"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("8_saving")

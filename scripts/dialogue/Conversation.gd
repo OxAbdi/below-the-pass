@@ -15,11 +15,14 @@ extends RefCounted
 #   caught:<statement>               that lie has been caught (each one only once)
 #   seen:<conversation_id>:<node>    the node has played at least once
 
+#
+# Conditions ("if") and effects are understood by StoryRules.gd, the same as everywhere else.
+
 const EvidenceCatalog := preload("res://scripts/data/EvidenceCatalog.gd")
+const StoryRules := preload("res://scripts/story/StoryRules.gd")
 
 const END: String = "end"
-const CONDITION_KEYS: Array[String] = ["has_evidence", "not_evidence", "flag", "not_flag", "link", "seen"]
-const EFFECT_KEYS: Array[String] = ["set_flag", "clear_flag", "collect_evidence", "add_trust", "unlock_proof_tier", "sound"]
+const LINE_STYLES: Array[String] = ["", "thought", "action", "voice"]
 
 var conversation_id: String = ""
 var path: String = ""
@@ -74,8 +77,25 @@ func has_node(node_id: String) -> bool:
 	return nodes.has(node_id)
 
 
+# Where the talk goes after this node's lines. "next_if" is tried first: the first entry whose
+# condition passes wins. Otherwise "next".
 func next_of(node_id: String) -> String:
+	for branch: Variant in node(node_id).get("next_if", []):
+		var item: Dictionary = branch
+		if check(item.get("if", null)):
+			return str(item.get("node", END))
 	return str(node(node_id).get("next", END))
+
+
+# A node with no lines and no topics: it only runs its effects and moves on, showing nothing.
+func is_silent(node_id: String) -> bool:
+	var content: Dictionary = node(node_id)
+	return (content.get("lines", []) as Array).is_empty() and (content.get("choices", []) as Array).is_empty()
+
+
+# The short pencil label above the topics, for example "Briggs is testing you".
+func choice_tag(node_id: String) -> String:
+	return str(node(node_id).get("choice_tag", ""))
 
 
 func can_present(node_id: String) -> bool:
@@ -99,33 +119,8 @@ func visible_choices(node_id: String) -> Array[Dictionary]:
 	return result
 
 
-# Every key must pass. A value may be one id or a list of ids (then all of them must pass).
 func check(condition: Variant) -> bool:
-	if not condition is Dictionary:
-		return true
-	var rules: Dictionary = condition
-	for key: String in rules.keys():
-		for value: String in _as_list(rules[key]):
-			if not _check_one(key, value):
-				return false
-	return true
-
-
-func _check_one(key: String, value: String) -> bool:
-	match key:
-		"has_evidence":
-			return GameState.has_evidence(value)
-		"not_evidence":
-			return not GameState.has_evidence(value)
-		"flag":
-			return GameState.has_flag(value)
-		"not_flag":
-			return not GameState.has_flag(value)
-		"link":
-			return GameState.has_link(value)
-		"seen":
-			return GameState.has_flag(_seen_flag(value))
-	return false
+	return StoryRules.check(condition, conversation_id)
 
 
 # ---------- things the dialogue box reports ----------
@@ -138,23 +133,7 @@ func begin_node(node_id: String) -> void:
 		return
 	GameState.set_flag(flag)
 	for effect: Variant in node(node_id).get("effects", []):
-		_apply_effect(effect)
-
-
-func _apply_effect(effect: Dictionary) -> void:
-	if effect.has("set_flag"):
-		GameState.set_flag(str(effect["set_flag"]))
-	elif effect.has("clear_flag"):
-		GameState.clear_flag(str(effect["clear_flag"]))
-	elif effect.has("collect_evidence"):
-		GameState.collect_evidence(str(effect["collect_evidence"]))
-	elif effect.has("add_trust"):
-		var trust: Dictionary = effect["add_trust"]
-		GameState.add_trust(str(trust.get("character", "")), int(trust.get("amount", 0)))
-	elif effect.has("unlock_proof_tier"):
-		GameState.unlock_proof_tier(int(effect["unlock_proof_tier"]))
-	elif effect.has("sound"):
-		Audio.play(str(effect["sound"]))
+		StoryRules.apply(effect)
 
 
 # Call when a line is shown. A line marked as a statement goes on record.
@@ -164,8 +143,10 @@ func note_statement(line: Dictionary) -> void:
 		GameState.set_flag("said:" + statement)
 
 
-# James shows a piece of evidence. Returns { "caught": node_id } when it contradicts something
-# this person has said and has not been caught on yet, otherwise { "wrong": lines }.
+# James shows a piece of evidence. Returns:
+#   { "caught": node_id }    it contradicts something this person said (each lie only once)
+#   { "reaction": node_id }  this person has something to say about it (every time; no lie caught)
+#   { "wrong": lines }       anything else
 func present(evidence_id: String) -> Dictionary:
 	for contradiction: Variant in data.get("contradictions", []):
 		var item: Dictionary = contradiction
@@ -176,6 +157,9 @@ func present(evidence_id: String) -> Dictionary:
 			continue
 		GameState.set_flag("caught:" + statement)
 		return { "caught": str(item.get("goto", END)) }
+	for reaction: Variant in data.get("reactions", []):
+		if str((reaction as Dictionary).get("evidence", "")) == evidence_id:
+			return { "reaction": str((reaction as Dictionary).get("goto", END)) }
 	var groups: Array = data.get("wrong_present", [])
 	if groups.is_empty():
 		return { "wrong": [] }
@@ -198,7 +182,7 @@ func validate(portraits: Dictionary) -> Array[String]:
 		errors.append("There are no nodes.")
 	for entry: Variant in data.get("entries", []):
 		var item: Dictionary = entry
-		_validate_target(str(item.get("node", "")), "entries", errors, false)
+		_validate_target(str(item.get("node", "")), "entries", errors, true)
 		_validate_condition(item.get("if", null), "entries", errors)
 	for node_id: String in nodes.keys():
 		var content: Dictionary = nodes[node_id]
@@ -206,7 +190,10 @@ func validate(portraits: Dictionary) -> Array[String]:
 		for line: Variant in content.get("lines", []):
 			_validate_line(line, where, portraits, errors)
 		for effect: Variant in content.get("effects", []):
-			_validate_effect(effect, where, errors)
+			StoryRules.validate_effect(effect, where, errors)
+		for branch: Variant in content.get("next_if", []):
+			_validate_target(str((branch as Dictionary).get("node", "")), "\"next_if\" in %s" % where, errors, true)
+			_validate_condition((branch as Dictionary).get("if", null), "\"next_if\" in %s" % where, errors)
 		var choices: Array = content.get("choices", [])
 		for choice: Variant in choices:
 			var option: Dictionary = choice
@@ -216,7 +203,7 @@ func validate(portraits: Dictionary) -> Array[String]:
 			_validate_condition(option.get("if", null), "a choice in %s" % where, errors)
 		if choices.is_empty():
 			if not content.has("next"):
-				errors.append("%s has no \"next\" and no \"choices\", so the talk would get stuck there." % where.capitalize())
+				errors.append("%s has no \"next\" and no \"choices\", so the talk would get stuck there." % StoryRules.cap(where))
 			else:
 				_validate_target(str(content["next"]), where, errors, true)
 	for contradiction: Variant in data.get("contradictions", []):
@@ -227,6 +214,11 @@ func validate(portraits: Dictionary) -> Array[String]:
 		if not _statement_exists(str(item.get("statement", ""))):
 			errors.append("A contradiction answers statement '%s', but no line makes that statement." % str(item.get("statement", "")))
 		_validate_target(str(item.get("goto", "")), "a contradiction", errors, false)
+	for reaction: Variant in data.get("reactions", []):
+		var evidence_id: String = str((reaction as Dictionary).get("evidence", ""))
+		if not EvidenceCatalog.exists(evidence_id):
+			errors.append("A reaction uses evidence '%s', which is not in the evidence registry." % evidence_id)
+		_validate_target(str((reaction as Dictionary).get("goto", "")), "a reaction", errors, false)
 	for group: Variant in data.get("wrong_present", []):
 		for line: Variant in group:
 			_validate_line(line, "wrong_present", portraits, errors)
@@ -245,14 +237,19 @@ func _validate_target(target: String, where: String, errors: Array[String], end_
 	if target == END and end_allowed:
 		return
 	if not nodes.has(target):
-		errors.append("%s points to node '%s', which does not exist." % [where.capitalize(), target])
+		errors.append("%s points to node '%s', which does not exist." % [StoryRules.cap(where), target])
 
 
 func _validate_line(line: Variant, where: String, portraits: Dictionary, errors: Array[String]) -> void:
 	var item: Dictionary = line
 	var speaker: String = str(item.get("speaker", ""))
+	var style: String = str(item.get("style", ""))
 	if str(item.get("text", "")) == "":
 		errors.append("A line in %s has no text." % where)
+	if not LINE_STYLES.has(style):
+		errors.append("A line in %s uses style '%s'. Known styles: thought, action, voice." % [where, style])
+	if style == "action":
+		return
 	if speaker == "":
 		if not item.has("name"):
 			errors.append("A line in %s has no speaker." % where)
@@ -267,45 +264,21 @@ func _validate_line(line: Variant, where: String, portraits: Dictionary, errors:
 
 
 func _validate_condition(condition: Variant, where: String, errors: Array[String]) -> void:
-	if condition == null:
-		return
-	if not condition is Dictionary:
-		errors.append("The \"if\" in %s must be an object." % where)
-		return
-	var rules: Dictionary = condition
-	for key: String in rules.keys():
-		if not CONDITION_KEYS.has(key):
-			errors.append("The \"if\" in %s uses '%s', which is not a known condition." % [where, key])
-			continue
-		for value: String in _as_list(rules[key]):
-			if (key == "has_evidence" or key == "not_evidence") and not EvidenceCatalog.exists(value):
-				errors.append("The \"if\" in %s checks evidence '%s', which is not in the evidence registry." % [where, value])
-			if key == "seen" and not nodes.has(value):
-				errors.append("The \"if\" in %s checks node '%s', which does not exist." % [where, value])
+	StoryRules.validate_condition(condition, where, errors, nodes)
 
 
-func _validate_effect(effect: Variant, where: String, errors: Array[String]) -> void:
-	if not effect is Dictionary or (effect as Dictionary).size() != 1:
-		errors.append("An effect in %s must be an object with exactly one key." % where)
-		return
-	var key: String = str((effect as Dictionary).keys()[0])
-	if not EFFECT_KEYS.has(key):
-		errors.append("An effect in %s uses '%s', which is not a known effect." % [where, key])
-	elif key == "collect_evidence" and not EvidenceCatalog.exists(str(effect[key])):
-		errors.append("An effect in %s collects evidence '%s', which is not in the evidence registry." % [where, str(effect[key])])
+# Every effect in the file, as [{ "effect": {...}, "where": "node 'x'" }]. Used by the wider checks
+# (does that map exist, does that conversation exist), which need more than this one file.
+func all_effects() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for node_id: String in nodes.keys():
+		for effect: Variant in (nodes[node_id] as Dictionary).get("effects", []):
+			if effect is Dictionary:
+				result.append({ "effect": effect, "where": "node '%s'" % node_id })
+	return result
 
 
 # ---------- helpers ----------
 
 func _seen_flag(node_id: String) -> String:
 	return "seen:%s:%s" % [conversation_id, node_id]
-
-
-func _as_list(value: Variant) -> Array[String]:
-	var result: Array[String] = []
-	if value is Array:
-		for item: Variant in value:
-			result.append(str(item))
-	else:
-		result.append(str(value))
-	return result

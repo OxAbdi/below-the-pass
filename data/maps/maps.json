@@ -1,0 +1,30 @@
+{
+  "_notes": [
+    "Every place James can stand. The key (for example 'dev_a') is the map id used by doors, exits and story effects.",
+    "scene: the map's scene file in scenes/maps/.",
+    "name: shown on save cards and in the pause menu.",
+    "district: which music plays there (used from the audio milestone on).",
+    "exterior: true for outside maps. They get falling snow.",
+    "enter: a conversation tried every time James arrives. Its own 'entries' decide whether there is anything to say.",
+    "tint: the colour the whole map is tinted with, per time of day. 'default' is used for any phase not listed.",
+    "The two dev maps are a small test area for the game frame. Chapter 1's real maps are added in Milestone 6 part C."
+  ],
+  "maps": {
+    "dev_a": {
+      "scene": "res://scenes/maps/dev_a.tscn",
+      "name": "Dev room",
+      "district": "dev",
+      "exterior": false,
+      "enter": "",
+      "tint": { "day": "#ffe9c9", "night": "#55608a" }
+    },
+    "dev_b": {
+      "scene": "res://scenes/maps/dev_b.tscn",
+      "name": "Dev street",
+      "district": "dev",
+      "exterior": true,
+      "enter": "dev_enter_b",
+      "tint": { "day": "#c8ccd4", "night": "#55608a" }
+    }
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "_notes": [
+    "Chapter 1's opening film. It plays on a new game, before James appears on the train.",
+    "Each shot: image (the painting, when it exists), brief (what the painting shows: use it as the art prompt), palette (stand-in colours until then), seconds, fade (cross-fade seconds), move (slow pan and zoom: [zoom, x, y] from and to), snow (none, light, heavy), sound, music.",
+    "caption: words on black. black: true for a dark shot that only carries lines. title: the game's name over a shot. lines: dialogue lines, the same format as conversations.",
+    "Every caption and line here is word for word from docs/chapter-01-script.md, Scene 1. The film opens on the \"Winter, 1986\" card. Kessler's line is James's memory later, on the train (conversation ch01_train_thought), not part of this film.",
+    "Paintings go in res://assets/art/cinematics/ch01/ at 1920x1080 or larger, 16:9, anime style, matching docs/art-direction.md."
+  ],
+  "music": "ch01_intro",
+  "stop_music": true,
+  "shots": [
+    {
+      "id": "caption",
+      "caption": "Winter, 1986.\nThe forecast promised a clear night over the Harrow Pass.",
+      "seconds": 5.5
+    },
+    {
+      "id": "pass_clear",
+      "image": "res://assets/art/cinematics/ch01/01_pass_clear.png",
+      "seconds": 6.5,
+      "fade": 1.6,
+      "palette": [
+        "#0a1230",
+        "#33467a"
+      ],
+      "move": {
+        "from": [
+          1.04,
+          -60,
+          10
+        ],
+        "to": [
+          1.12,
+          60,
+          -10
+        ]
+      },
+      "snow": "none",
+      "brief": "Wide establishing shot, night, perfectly clear sky full of stars and a bright moon. Jagged snow-capped mountains. A small 1980s passenger train, one line of warm lit windows, climbs a winding track along a cliff towards a high notch between two peaks: the Harrow Pass. Old snow glows blue in the moonlight. Calm, beautiful, a little lonely."
+    },
+    {
+      "id": "snow_comes",
+      "image": "res://assets/art/cinematics/ch01/02_snow_comes.png",
+      "seconds": 5.5,
+      "fade": 1.4,
+      "palette": [
+        "#1b2140",
+        "#5a6488"
+      ],
+      "move": {
+        "from": [
+          1.0,
+          0,
+          0
+        ],
+        "to": [
+          1.1,
+          -40,
+          20
+        ]
+      },
+      "snow": "light",
+      "brief": "The same mountains from closer, minutes later. A wall of heavy cloud pours over the peaks like a wave and swallows the stars one by one. The first big snowflakes catch the beam of the train's headlamp below. The moon is going out. Unease."
+    },
+    {
+      "id": "title",
+      "image": "res://assets/art/cinematics/ch01/03_train_in_storm.png",
+      "seconds": 7.0,
+      "fade": 1.4,
+      "palette": [
+        "#20263a",
+        "#6c7590"
+      ],
+      "move": {
+        "from": [
+          1.12,
+          40,
+          0
+        ],
+        "to": [
+          1.02,
+          -40,
+          0
+        ]
+      },
+      "snow": "heavy",
+      "sound": "train_horn",
+      "title": {
+        "title": "Below the Pass",
+        "subtitle": "Chapter 1. Developed in Silence",
+        "at": 0.42
+      },
+      "brief": "Side view of the train in a blizzard, almost lost in driving snow. The carriage windows glow amber; the locomotive's lamp barely cuts through. Snow streaks diagonally across the whole frame. Leave the middle of the sky quiet: the game's title sits there."
+    },
+    {
+      "id": "carriage",
+      "image": "res://assets/art/cinematics/ch01/04_carriage.png",
+      "seconds": 5.0,
+      "fade": 1.2,
+      "palette": [
+        "#2a2230",
+        "#6a5a58"
+      ],
+      "move": {
+        "from": [
+          1.0,
+          0,
+          0
+        ],
+        "to": [
+          1.06,
+          20,
+          -10
+        ]
+      },
+      "snow": "none",
+      "sound": "train_brakes",
+      "brief": "Inside an old train carriage, night. James Flint, 26, dark coat, sits alone with a sealed metal evidence box on his knees, looking out of the window. Snow hammers the glass. The carriage lamps flicker. The other seats are empty. Warm interior, cold blue window."
+    }
+  ]
+}

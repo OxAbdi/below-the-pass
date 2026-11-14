@@ -1,0 +1,28 @@
+{
+  "conversation_id": "dev_train_thought",
+  "_notes": "Test version of the train scene's opening thought. The real one, ch01_train_thought, arrives in Milestone 6 part C. James thinks about what Kessler said (her voice is a memory, so it has a name and no face).",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "style": "thought",
+          "text": "The box hasn't moved off my knees since Kingsport. Her voice hasn't left my head either."
+        },
+        {
+          "name": "Kessler",
+          "name_color": "#b0c4de",
+          "style": "voice",
+          "text": "It's a box, Flint. You carry it over the pass, you hand it to the county clerk, you come home. Try not to solve anything."
+        },
+        {
+          "speaker": "james",
+          "style": "thought",
+          "text": "Try not to solve anything. Two months a detective. Two months of carrying boxes. At this rate I'll make inspector by the time I'm a hundred and four."
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

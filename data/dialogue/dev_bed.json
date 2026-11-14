@@ -1,0 +1,20 @@
+{
+  "conversation_id": "dev_bed",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Hospital corners. Goodnight, grey box."
+        }
+      ],
+      "effects": [
+        {
+          "set_flag": "dev_end"
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

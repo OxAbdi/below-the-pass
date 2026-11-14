@@ -1,0 +1,39 @@
+{
+  "conversation_id": "dev_clerk",
+  "partner": "katherine",
+  "_notes": "Test chapter: a person who is only here by day.",
+  "nodes": {
+    "intro": {
+      "lines": [
+        {
+          "speaker": "katherine",
+          "text": "I'm only here in the daytime. That's a fact, not a complaint."
+        }
+      ],
+      "next": "end"
+    },
+    "leaflet": {
+      "lines": [
+        {
+          "speaker": "katherine",
+          "text": "That's the leaflet from the desk. You can show it to me as often as you like."
+        }
+      ],
+      "next": "end"
+    }
+  },
+  "reactions": [
+    {
+      "evidence": "ch01_anniversary_leaflet",
+      "goto": "leaflet"
+    }
+  ],
+  "wrong_present": [
+    [
+      {
+        "speaker": "katherine",
+        "text": "I don't know what that is."
+      }
+    ]
+  ]
+}

@@ -14,6 +14,9 @@ extends Control
 # photo toward those targets a little every frame.
 
 signal all_clues_found
+# The player pressed Esc (or B on a controller) to put the photograph down. Whoever opened the
+# loupe listens for this and removes it.
+signal closed
 
 const DialogueBoxScene: PackedScene = preload("res://scenes/ui/dialogue/dialogue_box.tscn")
 const DialogueBoxScript := preload("res://scripts/ui/DialogueBox.gd")
@@ -135,6 +138,15 @@ func _gui_input(event: InputEvent) -> void:
 		press_travel += motion_event.relative.length()
 		target_position = _clamp_position(target_position + motion_event.relative, fit_scale * zoom_level)
 		set_process(true)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouse:
+		return
+	var is_pad_b: bool = event is InputEventJoypadButton and event.pressed and (event as InputEventJoypadButton).button_index == JOY_BUTTON_B
+	if (event.is_action_pressed("ui_cancel") and not event.is_echo()) or is_pad_b:
+		get_viewport().set_input_as_handled()
+		closed.emit()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:

@@ -1,0 +1,113 @@
+{
+  "conversation_id": "dev_desk",
+  "_notes": "Test chapter: shows a quiz tag, next_if, a silent node and the line styles.",
+  "entries": [
+    {
+      "if": {
+        "seen": "quiz"
+      },
+      "node": "again"
+    },
+    {
+      "node": "intro"
+    }
+  ],
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "A desk. Somebody left a leaflet on it."
+        },
+        {
+          "style": "action",
+          "text": "James turns the leaflet over."
+        }
+      ],
+      "effects": [
+        {
+          "collect_evidence": "ch01_anniversary_leaflet"
+        }
+      ],
+      "next": "quiz"
+    },
+    "quiz": {
+      "no_present": true,
+      "choice_tag": "The desk is testing you",
+      "choices": [
+        {
+          "text": "It's a desk.",
+          "goto": "right"
+        },
+        {
+          "text": "It's a very small horse.",
+          "goto": "wrong"
+        }
+      ]
+    },
+    "right": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Detective work. It's a gift."
+        }
+      ],
+      "effects": [
+        {
+          "set_flag": "dev_quiz_right"
+        }
+      ],
+      "next": "mark"
+    },
+    "wrong": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "No. Horses have fewer drawers.",
+          "style": "thought"
+        }
+      ],
+      "next": "mark"
+    },
+    "mark": {
+      "effects": [
+        {
+          "set_flag": "dev_desk_seen"
+        }
+      ],
+      "next_if": [
+        {
+          "if": {
+            "flag": "dev_quiz_right"
+          },
+          "node": "proud"
+        }
+      ],
+      "next": "end"
+    },
+    "proud": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Kessler would be so proud. She'd hide it well.",
+          "style": "thought"
+        }
+      ],
+      "next": "end"
+    },
+    "again": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Still a desk."
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

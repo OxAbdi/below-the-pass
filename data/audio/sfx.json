@@ -121,6 +121,54 @@
       "volume_db": -8.0,
       "pitch_jitter": 0.03,
       "what": "papers shuffled back into a folder"
+    },
+    "travel_out": {
+      "file": "travel_out.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "leaving a place: a door, footsteps fading"
+    },
+    "travel_in": {
+      "file": "travel_in.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "arriving somewhere: a door closing behind"
+    },
+    "menu_open": {
+      "file": "menu_open.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "pause menu paper sliding in"
+    },
+    "menu_close": {
+      "file": "menu_close.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "pause menu paper sliding away"
+    },
+    "save_write": {
+      "file": "save_write.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "a pencil scratching a short line"
+    },
+    "blackout": {
+      "file": "blackout.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "the power going out: a clunk, then silence"
+    },
+    "train_horn": {
+      "file": "train_horn.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "a distant diesel horn in a snowstorm, muffled"
+    },
+    "train_brakes": {
+      "file": "train_brakes.ogg",
+      "volume_db": -6.0,
+      "pitch_jitter": 0.0,
+      "what": "old train brakes squealing to a stop, a shudder, a hiss"
     }
   }
 }

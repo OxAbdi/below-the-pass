@@ -1,0 +1,22 @@
+{
+  "conversation_id": "dev_opening",
+  "_notes": "Test chapter: plays on black before the first picture.",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "name": "Kessler",
+          "name_color": "#b0c4de",
+          "style": "voice",
+          "text": "It's a test room, Flint. You walk around it, you press some buttons, you come home."
+        },
+        {
+          "style": "action",
+          "text": "Winter, 1986. A grey box, somewhere below the pass."
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

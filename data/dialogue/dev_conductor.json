@@ -1,0 +1,21 @@
+{
+  "conversation_id": "dev_conductor",
+  "_notes": "Test cutscene line. The real conductor (Arthur Bellamy) and his lines arrive in Milestone 6 part C.",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "name": "Conductor",
+          "text": "Last stop, sir. Everybody off, please. Mind the grey boxes."
+        },
+        {
+          "speaker": "james",
+          "style": "thought",
+          "text": "A conductor, in a room. Kessler's test budget at work."
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

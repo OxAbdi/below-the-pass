@@ -13,6 +13,8 @@ signal card_pinned(card_id: String)
 signal card_unpinned(card_id: String)
 signal question_answered(question_id: String)
 signal flag_changed(flag_id: String, on: bool)
+signal phase_changed(phase: String)
+signal counter_changed(counter_id: String, value: int)
 signal state_reset
 
 const TRUST_MIN: int = -5  # trust can go below zero when James catches someone lying
@@ -21,11 +23,15 @@ const TRUST_MAX: int = 5
 var current_chapter: int = 1
 var current_scene_id: String = ""
 
-# Trust counters (0-5). Repeated trust in Brandt or Priya can lead to Ending D.
+# Hidden bonds (-5 to +5). They change later lines, who helps James, and the endings.
+# Never shown to the player as numbers.
+# "jonah" is only for the old test room's conversation. Milestone 6 part C removes it.
 var trust: Dictionary = {
-	"brandt": 0,
-	"priya": 0,
-	"silas": 0,
+	"mary": 0,
+	"katherine": 0,
+	"briggs": 0,
+	"ruby": 0,
+	"kessler": 0,
 	"jonah": 0,
 }
 
@@ -67,6 +73,19 @@ var board_intro_seen: bool = false
 # Story flags: small yes/no facts, such as "Jonah has said he last saw her on Tuesday".
 # Conversations write and read these. A flag that is not in here is off.
 var flags: Dictionary = {}
+
+# The time of day, for example "night1" or "blackout". The chapter file lists the phases.
+var phase: String = ""
+
+# Where James is. "position" is [x, y] (an array, so it saves to JSON cleanly). An empty "map"
+# means a new game that has not started yet.
+var location: Dictionary = { "map": "", "spawn": "", "position": [0.0, 0.0], "facing": "S" }
+
+# Seconds played in this save (not counting the title screen or the pause menu).
+var play_seconds: float = 0.0
+
+# Small whole numbers the story needs to remember, for example frames of film left.
+var counters: Dictionary = {}
 
 
 func collect_evidence(evidence_id: String) -> void:
@@ -212,6 +231,35 @@ func has_flag(flag_id: String) -> bool:
 	return flags.has(flag_id)
 
 
+func set_phase(new_phase: String) -> void:
+	if phase == new_phase:
+		return
+	phase = new_phase
+	phase_changed.emit(phase)
+
+
+func set_counter(counter_id: String, value: int) -> void:
+	if counters.has(counter_id) and int(counters[counter_id]) == value:
+		return
+	counters[counter_id] = value
+	counter_changed.emit(counter_id, value)
+
+
+func get_counter(counter_id: String, default_value: int = 0) -> int:
+	return int(counters.get(counter_id, default_value))
+
+
+func set_location(map_id: String, spawn_id: String, position: Vector2, facing: String) -> void:
+	location = { "map": map_id, "spawn": spawn_id, "position": [position.x, position.y], "facing": facing }
+
+
+func location_position() -> Vector2:
+	var stored: Variant = location.get("position", [0.0, 0.0])
+	if stored is Array and (stored as Array).size() == 2:
+		return Vector2(float(stored[0]), float(stored[1]))
+	return Vector2.ZERO
+
+
 func reset() -> void:
 	current_chapter = 1
 	current_scene_id = ""
@@ -229,6 +277,10 @@ func reset() -> void:
 	board_wrong_tries.clear()
 	board_intro_seen = false
 	flags.clear()
+	phase = ""
+	location = { "map": "", "spawn": "", "position": [0.0, 0.0], "facing": "S" }
+	play_seconds = 0.0
+	counters.clear()
 	state_reset.emit()
 
 
@@ -252,6 +304,10 @@ func get_save_data() -> Dictionary:
 		"board_wrong_tries": board_wrong_tries.duplicate(),
 		"board_intro_seen": board_intro_seen,
 		"flags": flags.duplicate(),
+		"phase": phase,
+		"location": location.duplicate(true),
+		"play_seconds": play_seconds,
+		"counters": counters.duplicate(),
 	}
 
 
@@ -285,3 +341,21 @@ func load_save_data(data: Dictionary) -> void:
 	var saved_tries: Dictionary = data.get("board_wrong_tries", {})
 	for question_id: Variant in saved_tries:
 		board_wrong_tries[str(question_id)] = int(saved_tries[question_id])
+	phase = str(data.get("phase", ""))
+	var saved_location: Dictionary = data.get("location", {})
+	var saved_position: Variant = saved_location.get("position", [0.0, 0.0])
+	var x: float = 0.0
+	var y: float = 0.0
+	if saved_position is Array and (saved_position as Array).size() == 2:
+		x = float(saved_position[0])
+		y = float(saved_position[1])
+	location = {
+		"map": str(saved_location.get("map", "")),
+		"spawn": str(saved_location.get("spawn", "")),
+		"position": [x, y],
+		"facing": str(saved_location.get("facing", "S")),
+	}
+	play_seconds = float(data.get("play_seconds", 0.0))
+	var saved_counters: Dictionary = data.get("counters", {})
+	for counter_id: Variant in saved_counters:
+		counters[str(counter_id)] = int(saved_counters[counter_id])

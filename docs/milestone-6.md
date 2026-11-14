@@ -1,6 +1,8 @@
 # Milestone 6: Chapter 1, start to finish (grey-box)
 
 Status: REDESIGNED 2026-11-14 (Opus). Replaces the 2026-11-13 version, which was built on the old story.
+**Part A: BUILT 2026-11-14 (Fable).** See "Part A build notes" before building parts B and C.
+**Part A2 (boot screens, cinematic title, opening film, cutscenes): BUILT 2026-11-14 (Opus).** See "Part A2 build notes".
 
 ## Goal
 One game you can play from the title screen to the end of Chapter 1: the real story, every scene in
@@ -399,6 +401,112 @@ bars and caption; a scene card; the pause menu with the current lead; the save i
 New sound ids (silent until files exist): `travel_out`, `travel_in`, `menu_open`, `menu_close`, `save_write`,
 `blackout`.
 
+
+## Part A build notes (2026-11-14, Fable): read before building parts B and C
+
+Built and tested: `m6a_test.gd`, 135 checks, all pass. `m5_test.gd` (88) and `m42_test.gd` (164) still pass.
+
+### Where things ended up
+| Thing | File |
+| --- | --- |
+| Game scene | `scenes/game/game.tscn`, `scripts/game/Game.gd` |
+| Title (the main scene) | `scenes/ui/title.tscn`, `scripts/ui/TitleScreen.gd` |
+| Story rules and checks | `scripts/story/StoryRules.gd`, `StoryCheck.gd`, `StoryVisibility.gd` |
+| Director, map root | `scripts/game/ChapterDirector.gd`, `MapBase.gd` |
+| World pieces | `scripts/world/Hotspot.gd`, `Exit.gd`, `Blocker.gd`, `SpawnPoint.gd`, `PhaseLights.gd`, `Npc.gd` |
+| Saves | `scripts/autoloads/SaveManager.gd` (autoload) |
+| Menus | `scripts/ui/PauseMenu.gd`, `ChapterCard.gd`, `SaveIndicator.gd`, `Letterbox.gd`, `FadeLayer.gd`, `scripts/ui/menu/MenuSlips.gd`, `SlotList.gd`, `ConfirmBox.gd`, `DeskBackdrop.gd` |
+| Test area | `scenes/maps/dev_a.tscn`, `dev_b.tscn`, `data/chapters/dev_chapter.json`, `data/dialogue/dev_*.json` |
+
+### Small differences from the design above (all on purpose)
+- **Scene cards live in `FadeLayer.gd`** (the curtain and the text on it are one script). There is no `SceneCard.gd`.
+- **`GameState.current_chapter`** already existed, so no second `chapter` field was added.
+- **Trust:** the new cast is in. `jonah` is still there only because the old test room uses it. Part C removes it
+  when it moves the old data to `dev_`.
+- **`PhaseLights` is driven by the Game** (`MapBase.apply_phase`), not by listening to GameState itself, because it
+  needs the phase's settings from the chapter file.
+- **Instant phase changes are data:** a phase with `"instant": true` cuts instead of cross-fading. Give Chapter 1's
+  `blackout` phase `"instant": true`.
+- **Spawn facing:** spawn markers use `SpawnPoint.gd`, which has a `facing` setting (E, SE, S…). A plain Marker2D
+  faces the camera.
+- **`open_if` is already on `Hotspot.gd`** (a condition written as JSON text), so part C does not need to add it.
+- **A conversation's `entries` may point to `"end"`:** that is how a map's `enter` talk says nothing on later visits.
+- **Lines may carry `"name_color"`** (used for Kessler's voice lines: `#b0c4de`).
+- **The chapter file may name its board:** `"board": "res://data/puzzles/ch01_board.json"`.
+- **The pause menu pauses the whole tree.** Anything that must keep running while paused needs
+  `process_mode = PROCESS_MODE_ALWAYS`.
+- **The cut-away caption sits in the top bar** (left), not the bottom one: the dialogue's dark shade covers the
+  bottom bar while someone is talking, and the caption could not be read there.
+- **Pause key:** a `pause` input action (Esc, Start) is in `project.godot`.
+
+### How effects are ordered (important for part C's data)
+- Effects in a **beat's `on_complete`** run strictly in order, each waiting for the one before.
+- Effects on a **conversation node** are split: state effects (`set_flag`, `collect_evidence`, `add_trust`,
+  `set_phase`, `sound`…) happen at once, when the node starts. Game effects (`move_player`, `scene_card`, `cutaway`,
+  `play`, `notice`, `autosave`, `end_chapter`) wait until the conversation has closed, then run in order.
+  So a node with `[set_flag A, cutaway X, set_flag B]` sets A and B at once, and the cut-away plays after the talk ends.
+- A `scene_card` fades to black and leaves the screen black. The next `move_player` uses that black instead of
+  fading again, and the screen always fades back in when the queue is empty.
+- A finished beat is the flag `beat:<id>`. A played `auto_play` is the flag `auto:<id>`.
+
+### For part B
+- Overlays: `Game.open_overlay(id)` is a stub that prints a warning. Put overlay screens on `$Overlay` (layer 23), set
+  `Game.overlay` while one is open (James is then frozen and the pause key is off), and clear it on close.
+- `Hotspot.gd` already has `shot_id`. The loupe has the `closed` signal and closes on Esc / B.
+- Counters: `GameState.set_counter(id, value)`, `get_counter(id, default)`, signal `counter_changed`.
+
+### How to try it (F5)
+The title opens. New Game → pick a slot → a short test chapter in two grey rooms: look at the desk, go outside,
+talk to the stranger (a cut-away, then "Night"), go to bed (the chapter card). F9 jumps between beats.
+
+
+## Part A2 build notes (2026-11-14, Opus): boot, title, opening film, cutscenes
+
+Asked for by the creative director after testing part A. Tested in `m6a_test.gd` (166 checks, all pass).
+
+### What the player now sees
+1. **Boot cards** (`scenes/ui/boot.tscn`, the main scene; words in `data/ui/boot.json`): studio, "Made with Godot
+   Engine", "Before you play" (fiction notice, content, flashes, age rating), the autosave notice. A press skips a card
+   (after its `min_seconds`), Esc / Start skips them all. **The studio name and age rating are placeholders.**
+2. **Title** (`scripts/ui/TitleScreen.gd`): a moving picture (`scripts/ui/cinema/TitleBackdrop.gd`), the name, and a
+   film-poster menu down the left (`scripts/ui/menu/TitleMenu.gd`) with a one-line description of each item. "Press any
+   button" shows once per run. Music id `title_theme` (silent until the file exists). Real art goes in
+   `data/ui/title.json` as layers; the art brief is in the same file.
+3. **New game:** the chapter's `start.opening` may now be a list of effects. The dev chapter plays Chapter 1's real
+   opening film, `data/cinematics/ch01_intro.json`, then a test cutscene.
+4. **Save icon:** a turning camera shutter and "SAVING", inside the 5% safe area (it sat on the screen edge before).
+5. **First-control hint:** the first time James can walk in a save, key prompts show bottom-left until he walks a few
+   steps (flag `hint:controls`).
+
+### New systems for part C
+- **Cinematic** (`scripts/ui/cinema/Cinematic.gd`, effect `{ "cinematic": id }`, data in `data/cinematics/`): still
+  paintings with slow pan and zoom, cross-fades, captions on black, a title over a shot, dialogue lines, snow, sound and
+  music. A missing painting shows a stand-in with its `brief`; the brief is the art prompt. Hold Esc / Start 1 s to skip.
+- **Cutscene** (effect `{ "cutscene": id }`, data in `data/cutscenes/`, steps documented in `Game.gd`): `walk` (James or
+  anyone under the map's `Actors`, to a spawn or focus point), `face`, `camera`, `wait`, `play`, `effects`, `sound`.
+  A person's talk hotspot named `<Name>Spot` walks with them. Bars slide in for the whole cutscene.
+  Cutscenes cannot be skipped; keep them short and let the player make every dialogue choice inside them.
+- **`auto_play`** may name a cutscene: `{ "map": "train", "cutscene": "ch01_train_arrival" }`.
+- **Music:** `Audio.play_music(id)`, `Audio.stop_music()`, tracks in `data/audio/music.json` (each with a brief for the
+  composer).
+- `StoryCheck` validates cinematics and cutscenes too (unknown people, places, conversations and steps).
+
+### Chapter 1's opening, for part C (replaces the "Opening (black)" row and beat 1 below)
+- `start.opening`: `[{ "cinematic": "ch01_intro" }]` (already written: opens on the "Winter, 1986" caption card, then the paintings and
+  the title. Nobody speaks during the film). Delete the `ch01_opening` conversation from the plan.
+- Beat 1 `auto_play`: `{ "map": "train", "cutscene": "ch01_train_arrival" }`. Write that cutscene:
+  1. `wait` 0.6, then `play` `ch01_train_thought`: James thinks, then remembers Kessler's line (a `voice` line, no
+     portrait), then thinks "Try not to solve anything. Two months a detective...". Already written as the dev file
+     `dev_train_thought`; rename it to `ch01_train_thought` and keep the three lines.
+  2. `effects`: `set_flag ch01_bellamy_in_carriage`; Bellamy appears at the carriage door.
+  3. `walk` Bellamy to `beside_seat`; `face` James E.
+  4. `play` `ch01_train` (the whole Scene 1 exchange, with its CHOOSE: the player still picks James's answer).
+  5. `walk` Bellamy to `door` (wait false); `walk` James to `aisle`, then to `carriage_door`.
+  6. `effects`: `set_flag ch01_off_train` (beat 1 then moves James to the station, where the player is free).
+- The `train` map needs focus points `beside_seat`, `aisle` and `carriage_door`.
+- **The Godot licence:** the engine is MIT licensed, and its licence text must appear in the game (a Credits / Legal
+  screen in M8).
+
 ---
 
 # PART B: Chapter 1 mechanics (Sonnet)
@@ -732,12 +840,12 @@ Use these exactly. James's lines are `style: thought` unless marked.
 | `dusk` | Dusk | no | yes | light |
 | `night2` | Night | no | yes | none |
 
-Start: map `train`, spawn `seat`, phase `night1`, opening `ch01_opening`.
+Start: map `train`, spawn `seat`, phase `night1`, opening `[{ "cinematic": "ch01_intro" }]` (see Part A2 notes).
 
 ### Beats
 | # | id | lead | complete_when | on_complete (in order) | auto_play |
 | --- | --- | --- | --- | --- | --- |
-| 1 | ch01_b01 | Get off the train. | flag `ch01_off_train` | move_player station / carriage_door; autosave | train / `ch01_train` |
+| 1 | ch01_b01 | Get off the train. | flag `ch01_off_train` | move_player station / carriage_door; autosave | train / cutscene `ch01_train_arrival` |
 | 2 | ch01_b02 | Find somewhere warm. | flag `ch01_checked_in` | autosave | hotel_lobby / `ch01_checkin` |
 | 3 | ch01_b03 | Meet the town. Then get some sleep in Room 9. | flag `ch01_blackout_done` | scene_card "Morning"; set_phase morning; move_player hotel_lobby / stairs; autosave | |
 | 4 | ch01_b04 | Go downstairs. | flag `ch01_briggs_recruited` | autosave | hotel_lobby / `ch01_ruby_arrives` |
@@ -796,8 +904,8 @@ The darkroom door opens with the condition export `open_if` (A4) set to:
 ### Conversation list (script scene → conversation id)
 | Scene | Conversation(s) | Effects to add |
 | --- | --- | --- |
-| Opening (black) | `ch01_opening` | Kessler voice line, then an `action` line with the white text "Winter, 1986. The forecast promised a clear night over the Harrow Pass." |
-| 1, carriage | `ch01_train` | start: `set_flag ch01_bellamy_in_carriage`; end: `set_flag ch01_off_train` |
+| Opening (black) | (none: the film `ch01_intro`, already written) | |
+| 1, carriage | `ch01_train_thought`, `ch01_train` (inside the cutscene `ch01_train_arrival`) | the cutscene sets the flags; see Part A2 notes |
 | 1, platform | `ch01_station_payphone`, `ch01_station_clock`, `ch01_station_box` | |
 | 2, check-in | `ch01_checkin` (Ashcroft through James's thought about the coat) | end: `set_flag ch01_checked_in` |
 | 2, bar | `ch01_mary_bar` (with the topics hub) | leaving: `cutaway` { focus `mary_bar`, conversation `ch01_mary_moment_1` } and `set_flag ch01_met_mary` |

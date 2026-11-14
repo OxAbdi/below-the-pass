@@ -1,0 +1,51 @@
+{
+  "_notes": [
+    "The screens shown when the game starts, before the title. One card each, in order.",
+    "lines: the text, top to bottom. size: text size. font: 'sans' (clean capitals) or 'hand' (handwriting). alpha: 0..1, how bright.",
+    "icon: 'shutter' draws the saving icon above the text.",
+    "seconds: how long it stays. min_seconds: how long before a press can skip it.",
+    "A press skips one card. Esc (or Start) skips them all. The studio name and the rating are placeholders: fill them in when they are decided."
+  ],
+  "cards": [
+    {
+      "id": "studio",
+      "lines": [
+        { "text": "STUDIO NAME", "size": 54, "font": "sans", "weight": 300, "spacing": 14 },
+        { "text": "presents", "size": 24, "font": "hand", "alpha": 0.6 }
+      ],
+      "seconds": 2.8,
+      "min_seconds": 0.6
+    },
+    {
+      "id": "engine",
+      "lines": [
+        { "text": "MADE WITH", "size": 18, "font": "sans", "spacing": 6, "alpha": 0.6 },
+        { "text": "GODOT ENGINE", "size": 44, "font": "sans", "weight": 400, "spacing": 10 }
+      ],
+      "seconds": 2.4,
+      "min_seconds": 0.6
+    },
+    {
+      "id": "advisory",
+      "lines": [
+        { "text": "BEFORE YOU PLAY", "size": 24, "font": "sans", "spacing": 8, "alpha": 0.7 },
+        { "text": "Below the Pass is a work of fiction. Any resemblance to real people, places or events is coincidental.", "size": 24, "font": "sans", "weight": 300, "width": 1100 },
+        { "text": "It contains death, violence, alcohol and smoking.", "size": 24, "font": "sans", "weight": 300, "width": 1100 },
+        { "text": "Some scenes have camera flashes and sudden bright light. You can soften them in Settings.", "size": 24, "font": "sans", "weight": 300, "width": 1100 },
+        { "text": "Age rating: to be confirmed", "size": 18, "font": "sans", "spacing": 4, "alpha": 0.5 }
+      ],
+      "seconds": 7.0,
+      "min_seconds": 1.5
+    },
+    {
+      "id": "autosave",
+      "icon": "shutter",
+      "lines": [
+        { "text": "This game saves automatically.", "size": 26, "font": "sans", "weight": 300 },
+        { "text": "Please don't quit while this icon is turning.", "size": 26, "font": "sans", "weight": 300 }
+      ],
+      "seconds": 3.6,
+      "min_seconds": 0.8
+    }
+  ]
+}

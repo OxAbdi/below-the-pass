@@ -1,0 +1,16 @@
+{
+  "conversation_id": "dev_night",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Dark already. The bed's over there.",
+          "style": "thought"
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

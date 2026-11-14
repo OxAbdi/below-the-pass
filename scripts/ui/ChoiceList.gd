@@ -31,6 +31,7 @@ const SEPIA: Color = Color(0.478, 0.384, 0.282)
 var items: Array[Dictionary] = []
 var selected: int = 0
 var is_showing: bool = false
+var tag: String = ""  # a short pencil label above the slips, for example "Briggs is testing you"
 
 var _hover: Array[float] = []  # 0..1 per slip: how far it has slid out
 var _time: float = 0.0  # seconds since the slips appeared
@@ -56,7 +57,8 @@ func _ready() -> void:
 
 
 # `new_items`: [{ "text": String, "done": bool }, ...]. Only the first six are shown.
-func show_choices(new_items: Array) -> void:
+func show_choices(new_items: Array, new_tag: String = "") -> void:
+	tag = new_tag
 	items.clear()
 	_hover.clear()
 	for item: Variant in new_items:
@@ -175,6 +177,13 @@ func _draw() -> void:
 	for index: int in range(items.size()):
 		_draw_slip(index)
 	draw_set_transform(Vector2.ZERO)
+	if tag != "" and not items.is_empty() and _picked < 0:
+		var alpha: float = clampf((_time - 0.1) / 0.25, 0.0, 1.0)
+		var at: Vector2 = slip_rect(0).position + Vector2(6.0, -14.0)
+		draw_string(FONT, at + Vector2(1.0, 2.0), tag, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20, Color(0.0, 0.0, 0.0, 0.7 * alpha))
+		draw_string(FONT, at, tag, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 20, Color(PAPER, 0.9 * alpha))
+		var width: float = FONT.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		PaperFx.draw_wavy(self, at + Vector2(0.0, 7.0), width, Color(PAPER, 0.6 * alpha), 1.5, alpha)
 
 
 func _draw_slip(index: int) -> void:

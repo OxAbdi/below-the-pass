@@ -1,0 +1,41 @@
+{
+  "_notes": "A short test film for the game frame (tests only).",
+  "music": "",
+  "shots": [
+    {
+      "id": "a",
+      "caption": "Test caption.\nSecond line.",
+      "seconds": 2.0
+    },
+    {
+      "id": "b",
+      "image": "res://assets/art/cinematics/dev/none.png",
+      "brief": "A test painting that does not exist.",
+      "palette": [
+        "#102030",
+        "#405060"
+      ],
+      "seconds": 2.0,
+      "fade": 0.5,
+      "title": {
+        "title": "Test Title",
+        "subtitle": "Subtitle"
+      },
+      "snow": "heavy"
+    },
+    {
+      "id": "c",
+      "image": "res://assets/art/photos/test_photo_big.png",
+      "seconds": 1.5,
+      "fade": 0.5,
+      "lines": [
+        {
+          "name": "Narrator",
+          "style": "voice",
+          "text": "A line over a real picture."
+        }
+      ],
+      "lines_delay": 0.2
+    }
+  ]
+}

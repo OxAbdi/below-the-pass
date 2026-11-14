@@ -1,0 +1,16 @@
+{
+  "conversation_id": "dev_welcome",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "A room made of grey boxes. Kessler does know how to spoil a man.",
+          "style": "thought"
+        }
+      ],
+      "next": "end"
+    }
+  }
+}

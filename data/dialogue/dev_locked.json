@@ -1,0 +1,16 @@
+{
+  "conversation_id": "dev_locked",
+  "nodes": {
+    "intro": {
+      "no_present": true,
+      "lines": [
+        {
+          "speaker": "james",
+          "text": "Locked. No key, no luck.",
+          "style": "thought"
+        }
+      ],
+      "next": "end"
+    }
+  }
+}
